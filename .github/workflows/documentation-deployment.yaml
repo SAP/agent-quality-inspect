@@ -1,7 +1,6 @@
 name: Build-sphinx-docs-and-deploy
 
 on:
-  # Triggers the workflow on push request events
   push:
     branches: 
       - 'main'
