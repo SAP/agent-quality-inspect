@@ -91,14 +91,6 @@ AZURE_API_KEY=your_api_key
 
 > **Note:** The RapidAPI services used in these agent runners are third-party, user-subscribed services. SAP does not, provide, license or authorize their use.
 
-
-5. (Optional) Install package as dependency:
-To use the package as an importable dependency, enter your command terminal and use this command.
-
-```bash
-pip install git+https://github.com/SAP-samples/agent-quality-inspect.git
-```
-
 ## Quick Start
 
 There are two primary ways to use this repository:
@@ -110,11 +102,17 @@ There are two primary ways to use this repository:
 
 The standard flow of using it as a metrics package is as follows:
 
-1. Define your evaluation sample and agent trace.
-2. Evaluate the progress rates using the evaluation sample on your agent trace.
-3. Using the output of the Step 2, calculate any of the metric scores (AUC, PPT, pass@k, etc.).
-4. Optionally, run the error analysis on the outputs of previous steps.
-5. Visualize the error analysis results in the Streamlit UI.
+1. To use the package as an importable dependency, enter your command terminal and use this command.
+
+```bash
+pip install git+https://github.com/SAP-samples/agent-quality-inspect.git
+```
+
+2. Define your evaluation sample and agent trace.
+3. Evaluate the progress rates using the evaluation sample on your agent trace.
+4. Using the output of the Step 3, calculate any of the metric scores (AUC, PPT, pass@k, etc.).
+5. Optionally, run the error analysis on the outputs of previous steps.
+6. Visualize the error analysis results in the Streamlit UI.
    
 Example: constructing a minimal trace and computing an AUC score with the metrics package: Run the script using `streamlit run <script>.py`.
 
