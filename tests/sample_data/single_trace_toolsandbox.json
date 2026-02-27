@@ -1,0 +1,207 @@
+[
+  [
+    {
+      "role": "user",
+      "content": "Please create a reminder for me to buy chocolate milk on March 22, 2024, at 5PM.",
+      "user_details": {
+        "database_update": {
+          "CONTACT": [
+            {
+              "person_id": "3815cac9-3cab-5d75-89e2-fe12fe19779e",
+              "name": "Tomas Haake",
+              "phone_number": "+11233344455",
+              "relationship": "self",
+              "is_self": true
+            },
+            {
+              "person_id": "9e137f06-916a-5310-8174-cf0b7e9f7054",
+              "name": "Fredrik Thordendal",
+              "phone_number": "+12453344098",
+              "relationship": "friend",
+              "is_self": false
+            },
+            {
+              "person_id": "a22e1984-6c6c-530c-8831-c3ea3b5138e7",
+              "name": "John Petrucci",
+              "phone_number": "+1234560987",
+              "relationship": "friend",
+              "is_self": false
+            },
+            {
+              "person_id": "e3570ab6-0819-5032-be1e-2b366390c8ef",
+              "name": "Homer S",
+              "phone_number": "+10000000000",
+              "relationship": "boss",
+              "is_self": false
+            }
+          ],
+          "REMINDER": [
+            {
+              "reminder_id": "8f5b6fc6-1c25-5467-91ba-d4d1e17c7129",
+              "content": "Look for Company SF tickets",
+              "creation_timestamp": 1758984833.983523,
+              "reminder_timestamp": 1759157633.983525,
+              "latitude": null,
+              "longitude": null
+            },
+            {
+              "reminder_id": "da2b856e-9390-511f-bcbe-7005f72cbf5e",
+              "content": "Buy tickets for Merrily next week",
+              "creation_timestamp": 1759157633.983528,
+              "reminder_timestamp": 1759243973.983529,
+              "latitude": null,
+              "longitude": null
+            },
+            {
+              "reminder_id": "54f20be9-eac3-5e76-8e57-724e48d3d477",
+              "content": "Buy a nice rich navy bathing dress",
+              "creation_timestamp": 1759240433.983533,
+              "reminder_timestamp": 1759247633.983534,
+              "latitude": 37.3237926356735,
+              "longitude": -122.03961770355414
+            }
+          ],
+          "MESSAGING": [
+            {
+              "message_id": "0d25dbb9-3737-5e0e-b0f0-7c1e359baccc",
+              "sender_person_id": null,
+              "sender_phone_number": "+18307976530",
+              "recipient_person_id": "3815cac9-3cab-5d75-89e2-fe12fe19779e",
+              "recipient_phone_number": "+11233344455",
+              "content": "Hey kid, you want some GPU?",
+              "creation_timestamp": 1758970127.982085
+            },
+            {
+              "message_id": "caaca9e8-7aa9-55a6-9d32-4b4aefed40d1",
+              "sender_person_id": "3815cac9-3cab-5d75-89e2-fe12fe19779e",
+              "sender_phone_number": "+11233344455",
+              "recipient_person_id": null,
+              "recipient_phone_number": "+18307976530",
+              "content": "No leave me alone",
+              "creation_timestamp": 1758973727.982098
+            },
+            {
+              "message_id": "0a0102dc-ceaf-5ebb-a665-63da99bf7c47",
+              "sender_person_id": "e3570ab6-0819-5032-be1e-2b366390c8ef",
+              "sender_phone_number": "+10000000000",
+              "recipient_person_id": "3815cac9-3cab-5d75-89e2-fe12fe19779e",
+              "recipient_phone_number": "+11233344455",
+              "content": "How's it going",
+              "creation_timestamp": 1759240250.982107
+            },
+            {
+              "message_id": "6c9382cb-720e-5f2c-8ac0-77e7ebdea446",
+              "sender_person_id": "3815cac9-3cab-5d75-89e2-fe12fe19779e",
+              "sender_phone_number": "+11233344455",
+              "recipient_person_id": "e3570ab6-0819-5032-be1e-2b366390c8ef",
+              "recipient_phone_number": "+10000000000",
+              "content": "Things are proceeding as expected",
+              "creation_timestamp": 1759240310.982116
+            },
+            {
+              "message_id": "0a0102dc-ceaf-5ebb-a665-63da99bf7c47",
+              "sender_person_id": "e3570ab6-0819-5032-be1e-2b366390c8ef",
+              "sender_phone_number": "+10000000000",
+              "recipient_person_id": "3815cac9-3cab-5d75-89e2-fe12fe19779e",
+              "recipient_phone_number": "+11233344455",
+              "content": "Good, keep me posted",
+              "creation_timestamp": 1759243971.982123
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "call_G4m0paY1IStIkXmw75XStboF",
+          "function": {
+            "arguments": "{\"year\": 2024, \"month\": 3, \"day\": 22, \"hour\": 17, \"minute\": 0, \"second\": 0}",
+            "name": "datetime_info_to_timestamp"
+          },
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "tool_call_id": "call_G4m0paY1IStIkXmw75XStboF",
+      "role": "tool",
+      "name": "datetime_info_to_timestamp",
+      "content": "1711098000.0"
+    },
+    {
+      "role": "assistant",
+      "content": "",
+      "tool_calls": [
+        {
+          "id": "call_dl2lhIqGMwNWdHGjl0NIfWvs",
+          "function": {
+            "arguments": "{\"content\": \"Buy chocolate milk\", \"reminder_timestamp\": 1711098000}",
+            "name": "add_reminder"
+          },
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "tool_call_id": "call_dl2lhIqGMwNWdHGjl0NIfWvs",
+      "role": "tool",
+      "name": "add_reminder",
+      "content": "'cf67f642-9313-4c08-82c2-87323292741a'",
+      "tool_details": {
+        "database_update": {
+          "REMINDER": [
+            {
+              "reminder_id": "8f5b6fc6-1c25-5467-91ba-d4d1e17c7129",
+              "content": "Look for Company SF tickets",
+              "creation_timestamp": 1758984833.983523,
+              "reminder_timestamp": 1759157633.983525,
+              "latitude": null,
+              "longitude": null
+            },
+            {
+              "reminder_id": "da2b856e-9390-511f-bcbe-7005f72cbf5e",
+              "content": "Buy tickets for Merrily next week",
+              "creation_timestamp": 1759157633.983528,
+              "reminder_timestamp": 1759243973.983529,
+              "latitude": null,
+              "longitude": null
+            },
+            {
+              "reminder_id": "54f20be9-eac3-5e76-8e57-724e48d3d477",
+              "content": "Buy a nice rich navy bathing dress",
+              "creation_timestamp": 1759240433.983533,
+              "reminder_timestamp": 1759247633.983534,
+              "latitude": 37.3237926356735,
+              "longitude": -122.03961770355414
+            },
+            {
+              "reminder_id": "cf67f642-9313-4c08-82c2-87323292741a",
+              "content": "Buy chocolate milk",
+              "creation_timestamp": 1759244038.780905,
+              "reminder_timestamp": 1711098000.0,
+              "latitude": null,
+              "longitude": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "role": "assistant",
+      "content": "Your reminder to buy chocolate milk has been set for March 22, 2024, at 5:00 PM. Would you like to add any other details to this reminder?"
+    }
+  ],
+  [
+    {
+      "role": "user",
+      "content": "No, that's all I needed. Thank you!"
+    },
+    {
+      "role": "assistant",
+      "content": "You\u2019re welcome! Your reminder is all set. If you need anything else, just let me know. Have a great day!"
+    }
+  ]
+]
