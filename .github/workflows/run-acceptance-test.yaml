@@ -6,6 +6,11 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:  # Allow manual trigger
 
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
 jobs:
   find-open-prs:
     runs-on: ubuntu-latest
@@ -169,6 +174,9 @@ jobs:
           retention-days: 1
 
   acceptance-tests:
+    permissions:
+      contents: read
+      pull-requests: write
     needs: [find-open-prs, build]
     if: needs.find-open-prs.outputs.pr-numbers != '[]'
     runs-on: [self-hosted, solinas]
