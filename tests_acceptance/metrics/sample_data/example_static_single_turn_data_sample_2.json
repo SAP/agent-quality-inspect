@@ -1,0 +1,81 @@
+{
+    "id": "multiturnmessage3-1",
+    "metadata": {
+      "subgoals": [
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that the analysis for customer Bohr und Hammer GmbH Tools includes information on Total Amount in Company Code Currency that amounts to 54,800,013.30 EUR.",
+          "turn": 0
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that analysis provides insights on prioritizing Dispute ID 33409 (€20,750,089.32).",
+          "turn": 0
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that the analysis includes the information on total Disputed Amount that amounts to 20,500,089.32 EUR.",
+          "turn": 0
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that the analysis includes the total Non-Disputed Overdue Amount that amounts to 12,922,924 EUR.",
+          "turn": 0
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that the analysis includes action SUGGESTION to either set payment block or remove payment block.",
+          "turn": 0
+        }
+      ],
+      "expectedTools": [
+        {
+          "tool_name": "Fetch_AR_DATA", 
+          "tool_inputs": [
+            {
+              "name": "CompanyCode",
+              "content": "F001",
+              "mode": "exact"
+            },
+            {
+              "name": "CustomerAccount",
+              "content": "C0001",
+              "mode": "exact"              
+            }
+          ],
+          "turn" : 0
+        },
+        {
+          "tool_name": "calculator", 
+          "tool_output": {
+            "content": 20500089.32,
+            "mode": "exact"
+          },
+          "turn" : 0
+        },
+        {
+          "tool_name": "calculator", 
+          "tool_output": {
+            "content": 62.729158068300926,
+            "mode": "exact"
+          },
+          "turn" : 0
+        },
+        {
+          "tool_name": "calculator", 
+          "tool_output": {
+            "content": "amount to approximately 12,922,924 EUR.",
+            "mode": "judge"
+          },
+          "turn" : 0
+        }
+      ]
+    },
+    "input": [
+      {
+        "role": "user",
+        "content": "Can you analyze the customer account C0001 with company code F001 and suggest actions."
+      }
+    ],
+    "target": []
+}

@@ -1,0 +1,235 @@
+name: Acceptance Tests
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC on all open PRs
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  find-open-prs:
+    runs-on: ubuntu-latest
+    outputs:
+      pr-numbers: ${{ steps.get-prs.outputs.pr-numbers }}
+      pr-refs: ${{ steps.get-prs.outputs.pr-refs }}
+    steps:
+      - name: Get open PRs with failed or no tests
+        id: get-prs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+
+            console.log(`Found ${pullRequests.length} open PRs`);
+
+            // Check workflow runs for each PR to see if tests already passed
+            const prsNeedingTests = [];
+            const prsSkippedNoApprovals = [];
+            const prsSkippedAlreadyPassed = [];
+
+            for (const pr of pullRequests) {
+              // First, check if PR has at least 2 approving reviews
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+
+              // Count unique approving reviewers (in case someone approved multiple times)
+              const uniqueApprovers = new Set(
+                reviews
+                  .filter(review => review.state === 'APPROVED')
+                  .map(review => review.user.login)
+              );
+
+              const approvalCount = uniqueApprovers.size;
+
+              if (approvalCount < 2) {
+                console.log(`PR #${pr.number}: Only ${approvalCount} approval(s) - skipping (needs 2)`);
+                prsSkippedNoApprovals.push({ number: pr.number, approvals: approvalCount });
+                continue;
+              }
+
+              console.log(`PR #${pr.number}: Has ${approvalCount} approvals - checking test status`);
+
+              // Now check if tests already passed
+              const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'run-acceptance-test.yaml',
+                branch: pr.head.ref,
+                per_page: 5
+              });
+
+              // Find the most recent completed run for this PR
+              const lastRun = workflowRuns.workflow_runs.find(run =>
+                run.status === 'completed' &&
+                run.head_sha === pr.head.sha
+              );
+
+              if (!lastRun) {
+                console.log(`PR #${pr.number}: No previous test runs found - will test`);
+                prsNeedingTests.push(pr.number);
+              } else if (lastRun.conclusion !== 'success') {
+                console.log(`PR #${pr.number}: Last test ${lastRun.conclusion} - will test`);
+                prsNeedingTests.push(pr.number);
+              } else {
+                console.log(`PR #${pr.number}: Already has passing tests (run #${lastRun.run_number}) - skipping`);
+                prsSkippedAlreadyPassed.push({ number: pr.number, runNumber: lastRun.run_number });
+              }
+            }
+
+            const prRefs = prsNeedingTests.map(num => `refs/pull/${num}/merge`);
+
+            console.log(`PRs needing tests: ${prsNeedingTests.join(', ') || 'none'}`);
+            console.log(`PRs skipped (no approvals): ${prsSkippedNoApprovals.map(p => p.number).join(', ') || 'none'}`);
+            console.log(`PRs skipped (already passed): ${prsSkippedAlreadyPassed.map(p => p.number).join(', ') || 'none'}`);
+
+            core.setOutput('pr-numbers', JSON.stringify(prsNeedingTests));
+            core.setOutput('pr-refs', JSON.stringify(prRefs));
+            core.setOutput('skipped-no-approvals', JSON.stringify(prsSkippedNoApprovals));
+            core.setOutput('skipped-already-passed', JSON.stringify(prsSkippedAlreadyPassed));
+
+      - name: Summary
+        run: |
+          PR_NUMBERS='${{ steps.get-prs.outputs.pr-numbers }}'
+          SKIPPED_NO_APPROVALS='${{ steps.get-prs.outputs.skipped-no-approvals }}'
+          SKIPPED_ALREADY_PASSED='${{ steps.get-prs.outputs.skipped-already-passed }}'
+
+          echo "## 🧪 Daily Acceptance Test Run" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$PR_NUMBERS" = "[]" ]; then
+            echo "### ℹ️ No PRs need testing" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ PRs Being Tested" >> $GITHUB_STEP_SUMMARY
+            echo "$PR_NUMBERS" | jq -r '.[]' | while read pr; do
+              echo "- PR #$pr" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$SKIPPED_NO_APPROVALS" != "[]" ]; then
+            echo "### ⏸️ PRs Skipped - Awaiting Approvals (need 2)" >> $GITHUB_STEP_SUMMARY
+            echo "$SKIPPED_NO_APPROVALS" | jq -r '.[] | "- PR #\(.number) (has \(.approvals) approval\(if .approvals == 1 then "" else "s" end))"' >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$SKIPPED_ALREADY_PASSED" != "[]" ]; then
+            echo "### ✓ PRs Skipped - Already Passing" >> $GITHUB_STEP_SUMMARY
+            echo "$SKIPPED_ALREADY_PASSED" | jq -r '.[] | "- PR #\(.number) (run #\(.runNumber))"' >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          TOTAL_OPEN=$(echo "$PR_NUMBERS" "$SKIPPED_NO_APPROVALS" "$SKIPPED_ALREADY_PASSED" | jq -s 'add | length')
+          TOTAL_TESTING=$(echo "$PR_NUMBERS" | jq 'length')
+          echo "**Summary:** Testing $TOTAL_TESTING of $TOTAL_OPEN open PRs" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    needs: find-open-prs
+    if: needs.find-open-prs.outputs.pr-numbers != '[]'
+    runs-on: [self-hosted, solinas]
+    strategy:
+      matrix:
+        pr-number: ${{ fromJson(needs.find-open-prs.outputs.pr-numbers) }}
+      fail-fast: false  # Continue testing other PRs even if one fails
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ matrix.pr-number }}/merge
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Clean previous builds
+        run: |
+          rm -rf dist/ *.egg-info agent_inspect.egg-info
+
+      - name: Build package
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: package-dist-pr-${{ matrix.pr-number }}
+          path: dist/
+          retention-days: 1
+
+  acceptance-tests:
+    needs: [find-open-prs, build]
+    if: needs.find-open-prs.outputs.pr-numbers != '[]'
+    runs-on: [self-hosted, solinas]
+    strategy:
+      matrix:
+        pr-number: ${{ fromJson(needs.find-open-prs.outputs.pr-numbers) }}
+      fail-fast: false
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ matrix.pr-number }}/merge
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: package-dist-pr-${{ matrix.pr-number }}
+          path: dist/
+
+      - name: Install built package
+        run: |
+          python -m pip install --upgrade pip
+          pip install dist/*.whl
+
+      - name: Install test dependencies
+        run: |
+          pip install -r requirements_test.txt
+
+      - name: Run acceptance tests on PR #${{ matrix.pr-number }}
+        env:
+          AZURE_API_KEY: ${{ secrets.AZURE_API_KEY }}
+          AZURE_API_VERSION: ${{ secrets.AZURE_API_VERSION }}
+          AZURE_API_BASE: ${{ secrets.AZURE_API_BASE }}
+        run: |
+          echo "Running acceptance tests for PR #${{ matrix.pr-number }}"
+          pytest tests_acceptance/ --color=yes -v -n auto
+
+      - name: Comment on PR with results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ matrix.pr-number }};
+            const status = '${{ job.status }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            const body = `${emoji} Daily acceptance tests ${status === 'success' ? 'passed' : 'failed'}!
+
+            **Workflow Run:** [View Details](${runUrl})
+            **Triggered by:** Daily schedule (${new Date().toISOString()})`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: body
+            });

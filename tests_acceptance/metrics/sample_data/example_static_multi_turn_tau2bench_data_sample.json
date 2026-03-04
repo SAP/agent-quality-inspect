@@ -1,0 +1,173 @@
+{
+    "id": "multiturnmessage_8",
+    "input": [
+      {
+        "role": "user",
+        "content": "Hi, I\u2019d like to book a one-way flight from Chicago O\u2019Hare (ORD) to Philadelphia (PHL) on May 26. I want the exact same flight I took on May 10. My user id is sophia_silva_7557. I\u2019d also like to add an extra passenger, Kevin Smith (DOB: 2001-04-12). We prefer economy seats, specifically an aisle and a middle seat together. I don\u2019t need any checked bags or travel insurance. I\u2019ll pay with one of my certificates, and my budget is up to $500."
+      },
+      {
+        "role": "user",
+        "content": "Yes, all the details are correct. My date of birth is already in my profile, so you can use that. Please proceed."
+      },
+      {
+        "role": "user",
+        "content": "Yes, please go ahead and book these two seats for us on flight HAT271 using my certificate."
+      },
+      {
+        "role": "user",
+        "content": "Thank you, everything looks perfect. I have no further requests."
+      }
+    ],
+    "metadata": {
+      "subgoals": [
+        {
+          "type": "gradingNotes",
+          "details": "Agent get sophia_silva_7557 user details.",
+          "turn": 1
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Agent identifies reservation id as WUNA5K via tool call.",
+          "turn": 1
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Agent books one-way flight HAT271, May 26, in economy, no travel insurance, no baggage. Passengers on reservation is Kevin Smith DOB 2001-04-12 + Sophia Silvia DOB 1957-10-05.",
+          "turn": 2
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Agent uses single certificate for payment.",
+          "turn": 2
+        }
+      ],
+      "expectedTools": [
+        {
+          "tool_name": "get_user_details", 
+          "tool_inputs": [
+            {
+              "name": "user_id",
+              "content": "sophia_silva_7557",
+              "mode": "exact"
+            }
+          ],
+          "turn" : 1
+        },
+        {
+          "tool_name": "get_reservation_details", 
+          "tool_inputs": [
+            {
+              "name": "reservation_id",
+              "content": "WUNA5K",
+              "mode": "exact"
+            }
+          ],
+          "turn" : 1
+        },
+        {
+          "tool_name": "search_direct_flight", 
+          "tool_inputs": [
+            {
+              "name": "origin",
+              "content": "ORD",
+              "mode": "exact"
+            },
+            {
+              "name": "destination",
+              "content": "PHL",
+              "mode": "exact"
+            },
+            {
+              "name": "date",
+              "content": "2024-05-26",
+              "mode": "judge"
+            }
+          ],
+          "turn" : 1
+        },
+        {
+          "tool_name": "book_reservation", 
+          "tool_inputs": [
+            {
+              "name": "user_id",
+              "content": "sophia_silva_7557",
+              "mode": "exact"
+            },
+            {
+              "name": "origin",
+              "content": "ORD",
+              "mode": "exact"
+            },
+            {
+              "name": "destination",
+              "content": "PHL",
+              "mode": "exact"
+            },
+            {
+              "name": "flight_type",
+              "content": "one_way",
+              "mode": "exact"
+            },
+            {
+              "name": "cabin",
+              "content": "economy",
+              "mode": "exact"
+            },
+            {
+              "name": "flights",
+              "content": [
+                {
+                  "flight_number": "HAT271",
+                  "date": "2024-05-26"
+                }
+              ],
+              "mode": "exact"
+            },
+            {
+              "name": "passengers",
+              "content": [
+                {
+                  "first_name": "Sophia",
+                  "last_name": "Silva",
+                  "dob": "1957-10-05"
+                },
+                {
+                  "first_name": "Kevin",
+                  "last_name": "Smith",
+                  "dob": "2001-04-12"
+                }
+              ],
+              "mode": "exact"
+            },
+            {
+              "name": "payment_methods",
+              "content": [
+                {
+                  "payment_id": "certificate_8045380",
+                  "amount": 348
+                }
+              ],
+              "mode": "exact"
+            },
+            {
+              "name": "total_baggages",
+              "content": 0,
+              "mode": "exact"
+            },
+            {
+              "name": "nonfree_baggages",
+              "content": 0,
+              "mode": "exact"
+            },
+            {
+              "name": "insurance",
+              "content": "no",
+              "mode": "exact"
+            }
+          ],
+          "turn" : 2
+        }
+      ]
+    },
+    "target": []
+  }

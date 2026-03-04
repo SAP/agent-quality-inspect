@@ -1,0 +1,114 @@
+{
+    "id": "multiturnmessage3-1",
+    "metadata": {
+      "subgoals": [
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that the analysis for customer Bohr und Hammer GmbH Tools includes information on Total Amount in Company Code Currency that amounts to 34,673,013.30 EUR.",
+          "turn": "all"
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that analysis provides insights on prioritizing Dispute ID 33405 (€20,750,089.32).",
+          "turn": "all"
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that the analysis includes the information on total Disputed Amount that amounts to 21,750,089.32 EUR.",
+          "turn": "all"
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that the analysis includes the total Non-Disputed Overdue Amount that amounts to 12,922,924 EUR.",
+          "turn": "all"
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that agent's analysis includes action SUGGESTION to either set payment block or remove payment block.",
+          "turn": "all"
+        },
+        {
+          "type": "gradingNotes",
+          "details": "Ensure that agent inform user that the payment block has been successfully set for AccountingDocument 1400019736, AccountingDocumentItem 002, CompanyCode F001 for the Fiscal Year 2017 with reason code A.",
+          "turn": "all"
+        }
+      ],
+      "expectedTools": [
+        {
+          "tool_name": "Fetch_AR_DATA", 
+          "tool_inputs": [
+            {
+              "name": "CompanyCode",
+              "content": "F001",
+              "mode": "exact"
+            },
+            {
+              "name": "CustomerAccount",
+              "content": "C0001",
+              "mode": "exact"              
+            }
+          ],
+          "turn" : "all"
+        },
+        {
+          "tool_name": "calculator", 
+          "tool_output": {
+            "content": 62.729158068300926,
+            "mode": "exact"
+          },
+          "turn" : "all"
+        },
+        {
+          "tool_name": "calculator", 
+          "tool_output": {
+            "content": "amount to approximately 12,922,924 EUR.",
+            "mode": "judge"
+          },
+          "turn" : "all"
+        },
+        {
+          "tool_name": "Set Payment Block", 
+          "tool_inputs": [
+            {
+              "name": "CompanyCode",
+              "content": "F001",
+              "mode": "exact"
+            },
+            {
+              "name": "FiscalYear",
+              "content": "2017",
+              "mode": "exact"              
+            },
+            {
+              "name": "Code",
+              "content": "A",
+              "mode": "exact"              
+            },  
+            {
+              "name": "Note",
+              "content": "No Remark.",
+              "mode": "judge"              
+            },
+            {
+              "name": "AccountingDocument",
+              "content": "1400019736",
+              "mode": "exact"              
+            },
+            {
+              "name": "AccountingDocumentItem",
+              "content": "002",
+              "mode": "exact"              
+            }           
+          ],
+          "turn" : "all"
+        }
+      ]
+    },
+    "input": [
+      {
+        "role": "user",
+        "content": "You are a user trying to get help analyzing customer account C0001 under company code F001. When the assistant provides you with the analysis of customer account C0001 under company code F001,  you will ask the assistant to set a payment block on Accounting Document 1400019736, item 002, company code F001, for fiscal year 2017. If prompted for a payment block reason code, provide: 'A'. If prompted for a note, write no remarks. If prompted to approve the payment block, reply \"approve: true\"  without the quotation. Task is considered to be completed upon setting the payment block successfully."
+      }
+    ],
+    "target": []
+}
