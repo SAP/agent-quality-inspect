@@ -7,9 +7,9 @@
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/agent-quality-inspect)](https://api.reuse.software/info/github.com/SAP-samples/agent-quality-inspect)
 [![ICLR 2026](https://img.shields.io/badge/ICLR-2026-red.svg)](https://iclr.cc/Conferences/2026)
 
-Paper Link: https://openreview.net/pdf?id=fHsVNklKOc (Will be updated with the published version when available)
+Paper Link: https://openreview.net/pdf?id=fHsVNklKOc
 
-Documentation Link: https://sap-samples.github.io/agent-quality-inspect/
+Documentation Link: https://sap.github.io/agent-quality-inspect/
 
 ## Table of Contents
 - [Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis](#talk-evaluate-diagnose-user-aware-agent-evaluation-with-automated-error-analysis)
@@ -33,6 +33,10 @@ Documentation Link: https://sap-samples.github.io/agent-quality-inspect/
   - [License](#license)
 
 ## Overview
+
+![Two-step automated error discovery approach. Identical error colors indicate
+that similar low-level errors are clustered into the same high-level category.](overview.png)
+
 
 This repository contains the implementation of **Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis (TED)**.
 
@@ -263,6 +267,52 @@ python -m streamlit run paper_experiments/view_results.py -- --output-dir paper_
 ```
 
 Replace `<timestamp>` with the actual timestamp of your output directory. This loads the pickled results and starts a Streamlit app at `http://localhost:8501` that visualizes error categories and per-sample diagnostics. More details are in [paper_experiments/readme.md](paper_experiments/readme.md).
+
+### Download Pre-computed Results from HuggingFace
+
+We provide pre-computed experiment results on HuggingFace so you can explore the error diagnosis UI without running the full evaluation pipeline yourself.
+
+**1. Install the HuggingFace `datasets` library** (if not already installed):
+
+```bash
+pip install datasets
+```
+
+**2. Download the dataset:**
+
+```python
+from datasets import load_dataset
+
+dataset = load_dataset("SAP/agent-quality-inspect")
+```
+
+Alternatively, you can clone the repository directly using Git LFS:
+
+```bash
+git lfs install
+git clone https://huggingface.co/datasets/SAP/agent-quality-inspect
+```
+
+**3. Run error diagnosis on the downloaded results:**
+
+Once you have downloaded the results, you can launch the Error Diagnosis UI to explore the pre-computed error analysis. Point the Streamlit viewer at the downloaded output directory:
+
+```bash
+python -m streamlit run paper_experiments/view_results.py -- --output-dir <path-to-downloaded-results>
+```
+
+This loads the `error_analysis.pkl` file from the downloaded results and starts a Streamlit app at `http://localhost:8501` where you can interactively browse error categories and per-sample diagnostics.
+
+If you want to re-run the error analysis programmatically on the downloaded data, you can do so in Python:
+
+```python
+from agent_inspect.tools import ErrorAnalysis
+from agent_inspect.models.tools import ErrorAnalysisDataSample
+
+# Load the downloaded data samples
+error_analyzer = ErrorAnalysis(llm_client=client, max_workers=3)
+error_analysis_result = error_analyzer.analyze_batch(error_analysis_data_samples)
+```
 
 ## Bring Your Own Agent
 
