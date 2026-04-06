@@ -272,26 +272,25 @@ Replace `<timestamp>` with the actual timestamp of your output directory. This l
 
 We provide pre-computed experiment results on HuggingFace so you can explore the error diagnosis UI without running the full evaluation pipeline yourself.
 
-**1. Install the HuggingFace `datasets` library** (if not already installed):
+**1. Install the HuggingFace `huggingface_hub` library** (if not already installed):
 
 ```bash
-pip install datasets
+pip install huggingface_hub
 ```
 
-**2. Download the dataset:**
-
-```python
-from datasets import load_dataset
-
-dataset = load_dataset("SAP/agent-quality-inspect")
-```
-
-Alternatively, you can clone the repository directly using Git LFS:
+**2. Download the dataset using the provided script:**
 
 ```bash
-git lfs install
-git clone https://huggingface.co/datasets/SAP/agent-quality-inspect
+python paper_experiments/download_hf_dataset.py --output-dir <path-to-output-folder>
 ```
+
+To download a specific file:
+
+```bash
+python paper_experiments/download_hf_dataset.py --filename <filename> --output-dir <path-to-output-folder>
+```
+
+See [paper_experiments/download_hf_dataset.py](paper_experiments/download_hf_dataset.py) for all available options (`--repo-id`, `--repo-type`, etc.).
 
 **3. Run error diagnosis on the downloaded results:**
 
