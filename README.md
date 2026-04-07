@@ -268,51 +268,6 @@ python -m streamlit run paper_experiments/view_results.py -- --output-dir paper_
 
 Replace `<timestamp>` with the actual timestamp of your output directory. This loads the pickled results and starts a Streamlit app at `http://localhost:8501` that visualizes error categories and per-sample diagnostics. More details are in [paper_experiments/readme.md](paper_experiments/readme.md).
 
-### Download Pre-computed Results from HuggingFace
-
-We provide pre-computed experiment results on HuggingFace so you can explore the error diagnosis UI without running the full evaluation pipeline yourself.
-
-**1. Install the HuggingFace `huggingface_hub` library** (if not already installed):
-
-```bash
-pip install huggingface_hub
-```
-
-**2. Download the dataset using the provided script:**
-
-```bash
-python paper_experiments/download_hf_dataset.py --output-dir <path-to-output-folder>
-```
-
-To download a specific file:
-
-```bash
-python paper_experiments/download_hf_dataset.py --filename <filename> --output-dir <path-to-output-folder>
-```
-
-See [paper_experiments/download_hf_dataset.py](paper_experiments/download_hf_dataset.py) for all available options (`--repo-id`, `--repo-type`, etc.).
-
-**3. Run error diagnosis on the downloaded results:**
-
-Once you have downloaded the results, you can launch the Error Diagnosis UI to explore the pre-computed error analysis. Point the Streamlit viewer at the downloaded output directory:
-
-```bash
-python -m streamlit run paper_experiments/view_results.py -- --output-dir <path-to-downloaded-results>
-```
-
-This loads the `error_analysis.pkl` file from the downloaded results and starts a Streamlit app at `http://localhost:8501` where you can interactively browse error categories and per-sample diagnostics.
-
-If you want to re-run the error analysis programmatically on the downloaded data, you can do so in Python:
-
-```python
-from agent_inspect.tools import ErrorAnalysis
-from agent_inspect.models.tools import ErrorAnalysisDataSample
-
-# Load the downloaded data samples
-error_analyzer = ErrorAnalysis(llm_client=client, max_workers=3)
-error_analysis_result = error_analyzer.analyze_batch(error_analysis_data_samples)
-```
-
 ## Bring Your Own Agent
 
 You can plug in your own agentic system as long as it exposes a suitable interface and you can convert its interaction traces into the data structures expected by the metrics.
