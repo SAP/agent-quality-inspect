@@ -4,12 +4,12 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/agent-quality-inspect)](https://api.reuse.software/info/github.com/SAP-samples/agent-quality-inspect)
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/agent-quality-inspect)](https://api.reuse.software/info/github.com/SAP/agent-quality-inspect)
 [![ICLR 2026](https://img.shields.io/badge/ICLR-2026-red.svg)](https://iclr.cc/Conferences/2026)
 
-Paper Link: https://openreview.net/pdf?id=fHsVNklKOc (Will be updated with the published version when available)
+Paper Link: https://openreview.net/pdf?id=fHsVNklKOc
 
-Documentation Link: https://sap-samples.github.io/agent-quality-inspect/
+Documentation Link: https://sap.github.io/agent-quality-inspect/
 
 ## Table of Contents
 - [Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis](#talk-evaluate-diagnose-user-aware-agent-evaluation-with-automated-error-analysis)
@@ -33,6 +33,10 @@ Documentation Link: https://sap-samples.github.io/agent-quality-inspect/
   - [License](#license)
 
 ## Overview
+
+![Two-step automated error discovery approach. Identical error colors indicate
+that similar low-level errors are clustered into the same high-level category.](error_analysis_framework.png)
+
 
 This repository contains the implementation of **Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis (TED)**.
 
@@ -66,7 +70,7 @@ At the core of TED is a **subgoal-based evaluation**: users specify a set of nat
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/SAP-samples/agent-quality-inspect
+git clone https://github.com/SAP/agent-quality-inspect
 cd agent-quality-inspect
 ```
 
@@ -105,7 +109,7 @@ The standard flow of using it as a metrics package is as follows:
 1. To use the package as an importable dependency, enter your command terminal and use this command.
 
 ```bash
-pip install git+https://github.com/SAP-samples/agent-quality-inspect.git
+pip install git+https://github.com/SAP/agent-quality-inspect.git
 ```
 
 2. Define your evaluation sample and agent trace.
@@ -323,7 +327,7 @@ Note: `expected_tools` is optional for now, in the future we plan to support too
 No known issues.
 
 ## How to obtain support
-[Create an issue](https://github.com/SAP-samples/agent-quality-inspect/issues) in this repository if you find a bug or have questions about the content.
+[Create an issue](https://github.com/SAP/agent-quality-inspect/issues) in this repository if you find a bug or have questions about the content.
  
 For additional support, [ask a question in SAP Community](https://answers.sap.com/questions/ask.html).
 
