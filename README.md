@@ -300,6 +300,12 @@ Once you have downloaded the results, you can launch the Error Diagnosis UI to e
 python -m streamlit run paper_experiments/view_results.py -- --output-dir <path-to-downloaded-results>
 ```
 
+Example command:
+
+```bash
+python -m streamlit run paper_experiments/view_results.py -- --output-dir dataset/tau2bench/airline/gpt_4_1/expert
+```
+
 This loads the `error_analysis.pkl` file from the downloaded results and starts a Streamlit app at `http://localhost:8501` where you can interactively browse error categories and per-sample diagnostics.
 
 If you want to re-run the error analysis programmatically on the downloaded data, you can do so in Python:
