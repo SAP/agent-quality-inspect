@@ -35,7 +35,7 @@ Documentation Link: https://sap.github.io/agent-quality-inspect/
 ## Overview
 
 ![Two-step automated error discovery approach. Identical error colors indicate
-that similar low-level errors are clustered into the same high-level category.](overview.png)
+that similar low-level errors are clustered into the same high-level category.](error_analysis_framework.png)
 
 
 This repository contains the implementation of **Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis (TED)**.
