@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluation Leaderboard — Agentic AI Metrics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Design tokens
+───────────────────────────────────────────────────────────── */
+:root {
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "SF Mono", ui-monospace, "Cascadia Code", monospace;
+
+  /* Surface */
+  --bg:         #fafafa;
+  --surface:    #ffffff;
+  --border:     #e4e4e7;
+  --border-sub: #f4f4f5;
+
+  /* Text */
+  --text-1: #18181b;
+  --text-2: #52525b;
+  --text-3: #a1a1aa;
+
+  /* Brand (single accent) */
+  --brand:    #4f46e5;
+  --brand-bg: #eef2ff;
+  --brand-dim: #c7d2fe;
+
+  /* Semantic scores (text-only, no backgrounds) */
+  --score-hi:  #15803d;  /* ≥ 0.75 */
+  --score-mid: #b45309;  /* ≥ 0.50 */
+  --score-lo:  #b91c1c;  /* < 0.50 */
+
+  /* Shape */
+  --radius:    6px;
+  --radius-sm: 4px;
+
+  /* Shadow */
+  --shadow: 0 1px 2px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Reset / base
+───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Layout
+───────────────────────────────────────────────────────────── */
+.container { max-width: 1600px; margin: 0 auto; padding: 0 32px; }
+
+/* ─────────────────────────────────────────────────────────────
+   Navigation bar
+───────────────────────────────────────────────────────────── */
+.nav {
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+}
+.nav-brand {
+  font-size: 13px; font-weight: 600; color: var(--text-1);
+  text-decoration: none; letter-spacing: -0.01em;
+}
+.nav-brand .nav-divider { color: var(--border); margin: 0 8px; font-weight: 400; }
+.nav-brand .nav-section { color: var(--text-3); font-weight: 400; }
+
+/* ─────────────────────────────────────────────────────────────
+   Button
+───────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 12px; font-weight: 500;
+  cursor: pointer; text-decoration: none; white-space: nowrap; line-height: 1;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.btn-outline {
+  border: 1px solid var(--border); background: transparent; color: var(--text-2);
+}
+.btn-outline:hover { background: var(--bg); color: var(--text-1); }
+
+/* ─────────────────────────────────────────────────────────────
+   Page header
+───────────────────────────────────────────────────────────── */
+.page-header { padding: 32px 0 24px; }
+.page-title  { font-size: 20px; font-weight: 600; color: var(--text-1); letter-spacing: -0.015em; margin-bottom: 6px; }
+.page-sub    { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.page-sub code {
+  font-family: var(--font-mono); font-size: 11.5px;
+  background: var(--border-sub); padding: 1px 5px;
+  border-radius: var(--radius-sm); color: var(--text-2);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Tab bar (tabs left | sort + count right)
+───────────────────────────────────────────────────────────── */
+.tab-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 48px; z-index: 90;
+}
+.tab-bar-inner {
+  display: flex; align-items: stretch; justify-content: space-between;
+  min-height: 44px;
+}
+.tabs { display: flex; }
+.tab-btn {
+  padding: 0 18px; border: none; background: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  color: var(--text-2); white-space: nowrap; cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+.tab-btn:hover  { color: var(--text-1); }
+.tab-btn.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 600; }
+
+.tab-controls {
+  display: flex; align-items: center; gap: 10px; padding: 0 2px;
+}
+.sort-label { font-size: 12px; color: var(--text-3); font-weight: 400; }
+.sort-select {
+  padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); font-family: var(--font); font-size: 12px;
+  color: var(--text-1); cursor: pointer; outline: none;
+  transition: border-color 0.1s;
+}
+.sort-select:focus { border-color: var(--brand); }
+.result-count { font-size: 12px; color: var(--text-3); padding-right: 2px; }
+
+/* ─────────────────────────────────────────────────────────────
+   Table
+───────────────────────────────────────────────────────────── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden; overflow-x: auto;
+  margin-bottom: 40px;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+thead { background: var(--bg); }
+thead tr { border-bottom: 1px solid var(--border); }
+thead th {
+  padding: 9px 16px;
+  text-align: left;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-2); white-space: nowrap;
+  user-select: none;
+}
+thead th.sortable { cursor: pointer; transition: color 0.1s; }
+thead th.sortable:hover { color: var(--text-2); }
+thead th.sorted { color: var(--text-2); }
+thead th .arr { margin-left: 3px; }
+thead th.sorted .arr { color: var(--brand); }
+
+tbody tr { border-bottom: 1px solid var(--border-sub); transition: background 0.08s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg); }
+tbody td { padding: 12px 16px; vertical-align: middle; }
+
+/* Rank column */
+.col-rank { width: 48px; text-align: center; }
+.rank-num {
+  font-size: 13px; font-weight: 500; color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.rank-num.rank-1 { color: var(--text-1); font-weight: 600; }
+
+/* Model column */
+.model-name { font-size: 13px; font-weight: 600; color: var(--text-1); }
+.model-agent { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+/* Persona pill */
+.persona-pill {
+  display: inline-block; padding: 2px 7px; border-radius: var(--radius-sm);
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.persona-expert    { background: var(--brand-bg); color: var(--brand); }
+.persona-nonexpert { background: var(--border-sub); color: var(--text-2); }
+
+/* Metric values — primary column (sorted) */
+.metric-primary {
+  font-size: 13px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.score-hi  { color: var(--text-1); }
+.score-mid { color: var(--text-1); }
+.score-lo  { color: var(--text-1); }
+.score-na  { color: var(--text-3); font-weight: 400; }
+
+/* Metric values — secondary columns */
+.metric-num { font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.metric-na  { font-size: 13px; color: var(--text-3); }
+
+/* Details link */
+.link-btn {
+  display: inline-flex; align-items: center;
+  padding: 4px 10px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); background: var(--surface);
+  font-family: var(--font); font-size: 12px; font-weight: 500;
+  color: var(--text-2); text-decoration: none; white-space: nowrap;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.link-btn:hover { background: var(--bg); color: var(--text-1); border-color: var(--text-3); }
+
+/* ─────────────────────────────────────────────────────────────
+   Empty state (tab has no entries)
+───────────────────────────────────────────────────────────── */
+.empty-state { padding: 56px 24px; text-align: center; }
+.empty-state-title { font-size: 14px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; }
+.empty-state-desc  { font-size: 13px; color: var(--text-2); }
+.empty-state-cmd {
+  display: inline-block; margin-top: 14px; padding: 10px 16px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); font-family: var(--font-mono);
+  font-size: 12px; color: var(--text-1); white-space: pre; text-align: left;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   No-data state (empty database)
+───────────────────────────────────────────────────────────── */
+#no-data {
+  display: none; max-width: 480px; margin: 80px auto 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px; text-align: center;
+}
+#no-data h2 { font-size: 15px; font-weight: 600; color: var(--text-1); margin-bottom: 8px; }
+#no-data p  { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+#no-data code {
+  display: block; margin-top: 14px; padding: 12px 16px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); font-family: var(--font-mono);
+  font-size: 12px; color: var(--text-1); text-align: left; white-space: pre-wrap;
+}
+#no-data .hint { margin-top: 12px; font-size: 12px; color: var(--text-3); }
+
+/* ── Persona comparison chart panel ── */
+.chart-panel {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0 24px;
+}
+.chart-panel-inner {
+  max-width: 1600px; margin: 0 auto; padding: 0 32px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+@media (max-width: 760px) { .chart-panel-inner { grid-template-columns: 1fr; } }
+.chart-box {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px 10px; background: var(--bg); box-shadow: var(--shadow);
+}
+/* Win-rate matrix */
+.wr-section { margin-bottom: 24px; }
+.wr-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.wr-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-2); }
+.wr-toggle { font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
+.wr-wrap { overflow-x: auto; }
+.wr-table { border-collapse: collapse; font-size: 11.5px; white-space: nowrap; }
+.wr-table th, .wr-table td { padding: 5px 9px; border: 1px solid var(--border); text-align: center; }
+.wr-table thead th { background: var(--surface); font-weight: 600; font-size: 11px; }
+.wr-table .wr-row-label { text-align: left; background: var(--surface); font-weight: 600; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.wr-table .wr-self { background: var(--surface); color: var(--text-3); }
+.wr-table .wr-hi  { background: rgba(34,197,94,0.18); }
+.wr-table .wr-mid { background: rgba(234,179,8,0.13); }
+.wr-table .wr-lo  { background: rgba(239,68,68,0.14); }
+.wr-table .wr-mean-col { font-weight: 700; background: var(--surface); border-left: 2px solid var(--border); }
+
+.chart-box-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-2); text-align: center; margin-bottom: 10px;
+}
+.btn-compare { gap: 5px; }
+.btn-compare.active {
+  background: var(--brand-bg); color: var(--brand); border-color: var(--brand-dim);
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a class="nav-brand" href="#">
+      Agentic AI Metrics
+      <span class="nav-divider">/</span>
+      <span class="nav-section">Leaderboard</span>
+    </a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-outline btn-compare" id="compare-btn" onclick="toggleChart()">Compare personas</button>
+      <button class="btn btn-outline" onclick="location.reload()">Reload</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Persona comparison chart panel -->
+<div id="chart-panel" class="chart-panel" style="display:none">
+  <div class="chart-panel-inner">
+    <div class="chart-box">
+      <div class="chart-box-title">MaxAUC@k — Expert vs Non-Expert</div>
+      <canvas id="chart-auc"></canvas>
+    </div>
+    <div class="chart-box">
+      <div class="chart-box-title">MaxPPT@k — Expert vs Non-Expert</div>
+      <canvas id="chart-ppt"></canvas>
+    </div>
+    <div class="chart-box">
+      <div class="chart-box-title">MaxProg@k — Expert vs Non-Expert</div>
+      <canvas id="chart-max-pr"></canvas>
+    </div>
+    <div class="chart-box">
+      <div class="chart-box-title">MeanProg@k — Expert vs Non-Expert</div>
+      <canvas id="chart-mean-pr"></canvas>
+    </div>
+    <div class="chart-box">
+      <div class="chart-box-title">Pass@k — Expert vs Non-Expert</div>
+      <canvas id="chart-pass-k"></canvas>
+    </div>
+    <div class="chart-box">
+      <div class="chart-box-title">Pass^k — Expert vs Non-Expert</div>
+      <canvas id="chart-pass-hat"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Page header -->
+<div class="container">
+  <header class="page-header">
+    <h1 class="page-title">Evaluation Leaderboard</h1>
+    <p class="page-sub">Benchmark results across model configurations. Add results via <code>python paper_experiments/add_results.py</code>.</p>
+  </header>
+</div>
+
+<!-- Empty database state -->
+<div class="container">
+  <div id="no-data">
+    <h2>No results yet</h2>
+    <p>Run the import script to add your first experiment:</p>
+    <code>python paper_experiments/add_results.py \
+  --results-dir paper_experiments/experiment_outputs_YYYYMMDD</code>
+    <p class="hint">Then reload this page.</p>
+  </div>
+</div>
+
+<!-- App (JS-rendered) -->
+<div id="app"></div>
+
+<script src="leaderboard_data.js"></script>
+
+<script>
+(function () {
+  const raw = (typeof window.LEADERBOARD_DATA !== "undefined") ? window.LEADERBOARD_DATA : null;
+  const datasets = raw && raw.datasets ? raw.datasets : {};
+
+  if (Object.keys(datasets).length === 0) {
+    document.getElementById("no-data").style.display = "block";
+    return;
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+  function fmtModel(s) {
+    if (!s) return "—";
+    const name = s.includes("/") ? s.split("/").slice(1).join("/") : s;
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
+  // ── Available metrics per dataset (for win-rate metric selection) ───────
+  const DATASET_METRIC_OPTIONS = [
+    { key: "auc",      label: "MaxAUC@k",   get: e => e.metrics?.auc_score?.avg_max },
+    { key: "ppt",      label: "MaxPPT@k",   get: e => e.metrics?.ppt_score?.avg_max },
+    { key: "max_pr",   label: "MaxProg@k",  get: e => e.metrics?.max_progress_rate?.avg_max },
+    { key: "mean_pr",  label: "MeanProg@k", get: e => e.metrics?.mean_progress_rate?.avg_max },
+    { key: "pass_k",   label: "Pass@k",     get: e => e.metrics?.pass_at_k?.avg ?? e.metrics?.["pass@k"]?.avg },
+    { key: "pass_hat", label: "Pass^k",     get: e => e.metrics?.pass_hat_k?.avg ?? e.metrics?.["pass^k"]?.avg },
+  ];
+
+  function detectDefaultMetric(entries) {
+    for (const opt of DATASET_METRIC_OPTIONS) {
+      if ((entries || []).some(e => opt.get(e) != null)) return opt.key;
+    }
+    return DATASET_METRIC_OPTIONS[0].key;
+  }
+
+  // ── Metrics shown in the dataset detail view ────────────────────────────
+  const DETAIL_METRICS = [
+    { key: "auc",      label: "MaxAUC@k",   get: e => e.metrics?.auc_score?.avg_max },
+    { key: "ppt",      label: "MaxPPT@k",   get: e => e.metrics?.ppt_score?.avg_max },
+    { key: "max_pr",   label: "MaxProg@k",  get: e => e.metrics?.max_progress_rate?.avg_max },
+    { key: "mean_pr",  label: "MeanProg@k", get: e => e.metrics?.mean_progress_rate?.avg_max },
+    { key: "pass_k",   label: "Pass@k",     get: e => e.metrics?.pass_at_k?.avg ?? e.metrics?.["pass@k"]?.avg },
+    { key: "pass_hat", label: "Pass^k",     get: e => e.metrics?.pass_hat_k?.avg ?? e.metrics?.["pass^k"]?.avg },
+  ];
+
+  // ── State ──────────────────────────────────────────────────────────────
+  const dsKeys = Object.keys(datasets);
+  const initDsMetrics = {};
+  for (const key of dsKeys) {
+    initDsMetrics[key] = detectDefaultMetric(datasets[key].entries || []);
+  }
+
+  const state = {
+    view:      "global",    // "global" | "dataset"
+    tab:       dsKeys[0],   // active dataset key for dataset-detail view
+    sortCol:   "mean_win_rate",
+    sortDir:   -1,
+    dsMetrics: initDsMetrics, // dsKey → metric option key used for win-rate
+    dsSortCol: "auc",
+    dsSortDir: -1,
+  };
+
+  // ── Helpers ────────────────────────────────────────────────────────────
+  function fmt(v, dp = 3) {
+    if (v == null) return null;
+    const n = parseFloat(v);
+    return isNaN(n) ? null : n.toFixed(dp);
+  }
+
+  function scoreClass(v) {
+    if (v == null) return "score-na";
+    const n = parseFloat(v);
+    if (isNaN(n)) return "score-na";
+    if (n >= 0.75) return "score-hi";
+    if (n >= 0.50) return "score-mid";
+    return "score-lo";
+  }
+
+  // Slugify a string for folder names
+  function slugify(s) {
+    return (s || "")
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[-\s]+/g, "_")
+      .trim();
+  }
+
+  // Generate folder name for detail pages: {dataset}_{model}_{persona}_{id}
+  function generateFolderName(entry, dsKey) {
+    const model = entry.agent_model || "unknown";
+    // Match Python logic: split by "/", then replace "-" and "." with "_"
+    const modelPart = model.includes("/") ? model.split("/").pop() : model;
+    const modelSlug = modelPart.replace(/-/g, "_").replace(/\./g, "_").toLowerCase();
+    const personaSlug = slugify(entry.user_proxy_persona || "expert");
+    const dsSlug = slugify(dsKey);
+    const entryId = (entry.id || "unknown").slice(0, 8);
+    return `${dsSlug}_${modelSlug}_${personaSlug}_${entryId}`;
+  }
+
+  // Minimal DOM builder
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else if (k === "class") n.className = v;
+      else if (k === "colspan") n.colSpan = v;
+      else if (k === "style") n.style.cssText = v;
+      else n.setAttribute(k, v);
+    }
+    kids.forEach(c => {
+      if (c == null) return;
+      n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return n;
+  }
+
+  // Expose active entries for the chart code
+  window._getActiveEntries = () => {
+    if (state.view === "dataset") {
+      const ds = datasets[state.tab];
+      return ds ? (ds.entries || []) : [];
+    }
+    // Global view: all entries across all datasets
+    return Object.values(datasets).flatMap(ds => ds.entries || []);
+  };
+
+  // ── Dataset-detail win-rate (multi-metric within one dataset) ───────────
+  const _DETAIL_WR_GETTERS = [
+    e => e.metrics?.auc_score?.avg_max,
+    e => e.metrics?.ppt_score?.avg_max,
+    e => e.metrics?.max_progress_rate?.avg_max,
+    e => e.metrics?.pass_at_k?.avg ?? e.metrics?.["pass@k"]?.avg,
+    e => e.metrics?.pass_hat_k?.avg ?? e.metrics?.["pass^k"]?.avg,
+  ];
+
+  function attachDatasetWinRates(entries) {
+    const n = entries.length;
+    for (let i = 0; i < n; i++) {
+      let wins = 0, opp = 0;
+      for (let j = 0; j < n; j++) {
+        if (i === j) continue;
+        for (const g of _DETAIL_WR_GETTERS) {
+          const va = g(entries[i]), vb = g(entries[j]);
+          if (va == null || vb == null) continue;
+          opp++;
+          if (va > vb) wins++;
+        }
+      }
+      entries[i]._winRate = opp > 0 ? wins / opp : null;
+    }
+  }
+
+  // ── Global mean win-rate computation ───────────────────────────────────
+  // For each dataset, pick ONE metric → compute pairwise win rate for each
+  // entry on that dataset. Mean Win Rate = average across all datasets.
+  function computeGlobalRows() {
+    // Build model map: modelKey → row
+    const modelMap = new Map();
+    for (const [dsKey, ds] of Object.entries(datasets)) {
+      for (const entry of (ds.entries || [])) {
+        const mkey = `${entry.agent_model}||${entry.user_proxy_persona || ""}`;
+        if (!modelMap.has(mkey)) {
+          modelMap.set(mkey, {
+            agent_model: entry.agent_model,
+            user_proxy_persona: entry.user_proxy_persona || "",
+            perDataset: {},
+          });
+        }
+      }
+    }
+
+    // Compute per-dataset win rates using the selected single metric
+    for (const [dsKey, ds] of Object.entries(datasets)) {
+      const entries = ds.entries || [];
+      if (!entries.length) continue;
+      const metricKey = state.dsMetrics[dsKey] || DATASET_METRIC_OPTIONS[0].key;
+      const metricOpt = DATASET_METRIC_OPTIONS.find(o => o.key === metricKey) || DATASET_METRIC_OPTIONS[0];
+
+      for (let i = 0; i < entries.length; i++) {
+        const ei = entries[i];
+        const mkey = `${ei.agent_model}||${ei.user_proxy_persona || ""}`;
+        const vi = metricOpt.get(ei);
+        let wins = 0, total = 0;
+        for (let j = 0; j < entries.length; j++) {
+          if (i === j) continue;
+          const vj = metricOpt.get(entries[j]);
+          if (vi == null || vj == null) continue;
+          total++;
+          if (vi > vj) wins++;
+        }
+        const row = modelMap.get(mkey);
+        if (row) {
+          row.perDataset[dsKey] = {
+            winRate:   total > 0 ? wins / total : null,
+            metricVal: vi,
+            entryId:   ei.id,
+          };
+        }
+      }
+    }
+
+    // Mean win rate averaged over whichever datasets the model was evaluated on
+    const rows = [];
+    for (const [, row] of modelMap) {
+      const wrs = Object.values(row.perDataset).map(d => d.winRate).filter(x => x != null);
+      row._meanWinRate = wrs.length > 0 ? wrs.reduce((a, b) => a + b, 0) / wrs.length : null;
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  // ── Shared top bar (view selector + optional sort controls) ────────────
+  function buildTopBar() {
+    const bar = el("div", { class: "tab-bar" });
+    const inner = el("div", { class: "container tab-bar-inner" });
+
+    // Left: view selector
+    const left = el("div", { class: "tabs", style: "align-items:center;" });
+    left.appendChild(el("span", { class: "sort-label", style: "padding:0 8px 0 0;" }, "View:"));
+
+    const viewSel = el("select", {
+      class: "sort-select",
+      style: "font-weight:600;",
+      onchange: e => {
+        const val = e.target.value;
+        if (val === "global") {
+          state.view = "global";
+          state.sortCol = "mean_win_rate";
+        } else {
+          state.view = "dataset";
+          state.tab = val;
+        }
+        render();
+      },
+    });
+    const gOpt = el("option", { value: "global" }, "Mean Win Rate");
+    if (state.view === "global") gOpt.selected = true;
+    viewSel.appendChild(gOpt);
+    viewSel.appendChild(el("option", { value: "", disabled: "" }, "── Datasets ──"));
+    for (const [key, ds] of Object.entries(datasets)) {
+      const o = el("option", { value: key }, ds.display_name);
+      if (state.view === "dataset" && state.tab === key) o.selected = true;
+      viewSel.appendChild(o);
+    }
+    left.appendChild(viewSel);
+
+    // Right: sort controls (dataset-detail view only)
+    const controls = el("div", { class: "tab-controls" });
+    if (state.view === "dataset") {
+      controls.appendChild(el("span", { class: "sort-label" }, "Sort by"));
+      const sel = el("select", {
+        class: "sort-select",
+        onchange: e => { state.dsSortCol = e.target.value; render(); },
+      });
+      DETAIL_METRICS.forEach(m => {
+        const o = el("option", { value: m.key }, m.label);
+        if (m.key === state.dsSortCol) o.selected = true;
+        sel.appendChild(o);
+      });
+      controls.appendChild(sel);
+      const ds = datasets[state.tab];
+      const n = ds ? (ds.entries || []).length : 0;
+      controls.appendChild(el("span", { class: "result-count" }, `${n} ${n === 1 ? "result" : "results"}`));
+    }
+
+    inner.appendChild(left);
+    inner.appendChild(controls);
+    bar.appendChild(inner);
+    return bar;
+  }
+
+  // ── Global Mean Win Rate view ───────────────────────────────────────────
+  function renderGlobal(app) {
+    const rows = computeGlobalRows();
+
+    // Sort
+    rows.sort((a, b) => {
+      let va, vb;
+      if (state.sortCol === "mean_win_rate") {
+        va = a._meanWinRate ?? -Infinity;
+        vb = b._meanWinRate ?? -Infinity;
+      } else {
+        va = (a.perDataset[state.sortCol]?.metricVal) ?? -Infinity;
+        vb = (b.perDataset[state.sortCol]?.metricVal) ?? -Infinity;
+      }
+      return (va < vb ? -1 : va > vb ? 1 : 0) * state.sortDir;
+    });
+
+    const wrap = el("div", { class: "container" });
+
+    // ── Per-dataset metric selectors ──────────────────────────────────────
+    const configBar = el("div", {
+      style: "display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 0 10px;",
+    });
+    configBar.appendChild(el("span", {
+      style: "font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-3);white-space:nowrap;",
+    }, "Win metric per dataset:"));
+
+    for (const [dsKey, ds] of Object.entries(datasets)) {
+      const grp = el("div", { style: "display:flex;align-items:center;gap:5px;" });
+      grp.appendChild(el("span", { style: "font-size:12px;color:var(--text-2);white-space:nowrap;" }, ds.display_name + ":"));
+      const msel = el("select", {
+        class: "sort-select",
+        onchange: e => { state.dsMetrics[dsKey] = e.target.value; render(); },
+      });
+      const curKey = state.dsMetrics[dsKey];
+      for (const opt of DATASET_METRIC_OPTIONS) {
+        const hasData = (ds.entries || []).some(entry => opt.get(entry) != null);
+        if (!hasData) continue;
+        const o = el("option", { value: opt.key }, opt.label);
+        if (opt.key === curKey) o.selected = true;
+        msel.appendChild(o);
+      }
+      grp.appendChild(msel);
+      configBar.appendChild(grp);
+    }
+    wrap.appendChild(configBar);
+
+    // ── Table ─────────────────────────────────────────────────────────────
+    const tableWrap = el("div", { class: "table-wrap" });
+    const tbl = el("table");
+    const thead = el("thead");
+    const hrow = el("tr");
+
+    function thSortG(label, colKey, extraStyle) {
+      const isSorted = colKey === state.sortCol;
+      const th = el("th", {
+        class: "sortable" + (isSorted ? " sorted" : ""),
+        style: extraStyle || "",
+        onclick: () => {
+          if (state.sortCol === colKey) state.sortDir *= -1;
+          else { state.sortCol = colKey; state.sortDir = -1; }
+          render();
+        },
+      });
+      th.appendChild(document.createTextNode(label));
+      th.appendChild(el("span", { class: "arr" }, isSorted ? (state.sortDir === -1 ? " ↓" : " ↑") : " ↕"));
+      return th;
+    }
+
+    hrow.appendChild(el("th", { class: "col-rank" }, "#"));
+    hrow.appendChild(el("th", {}, "Agent"));
+    hrow.appendChild(thSortG("Mean Win Rate", "mean_win_rate", "min-width:120px;"));
+
+    for (const [dsKey, ds] of Object.entries(datasets)) {
+      const metricKey = state.dsMetrics[dsKey] || DATASET_METRIC_OPTIONS[0].key;
+      const metricOpt = DATASET_METRIC_OPTIONS.find(o => o.key === metricKey) || DATASET_METRIC_OPTIONS[0];
+      const isSorted = dsKey === state.sortCol;
+      const th = el("th", {
+        class: "sortable" + (isSorted ? " sorted" : ""),
+        style: "white-space:normal;min-width:120px;",
+        onclick: () => {
+          if (state.sortCol === dsKey) state.sortDir *= -1;
+          else { state.sortCol = dsKey; state.sortDir = -1; }
+          render();
+        },
+      });
+      th.appendChild(el("div", {}, ds.display_name));
+      th.appendChild(el("div", { style: "font-weight:400;color:var(--text-3);font-size:10px;margin-top:2px;" }, metricOpt.label));
+      th.appendChild(el("span", { class: "arr" }, isSorted ? (state.sortDir === -1 ? " ↓" : " ↑") : " ↕"));
+      hrow.appendChild(th);
+    }
+
+    thead.appendChild(hrow);
+    tbl.appendChild(thead);
+
+    const tbody = el("tbody");
+    if (rows.length === 0) {
+      const tr = el("tr");
+      tr.appendChild(el("td", {
+        colspan: String(3 + dsKeys.length),
+        style: "text-align:center;padding:40px;color:var(--text-3);",
+      }, "No entries found."));
+      tbody.appendChild(tr);
+    }
+
+    rows.forEach((row, idx) => {
+      const rank = idx + 1;
+      const tr = el("tr");
+
+      // Rank
+      tr.appendChild(el("td", { class: "col-rank" },
+        el("span", { class: rank === 1 ? "rank-num rank-1" : "rank-num" }, String(rank))));
+
+      // Agent
+      const persona = row.user_proxy_persona;
+      const mtd = el("td", {});
+      mtd.appendChild(el("div", { class: "model-name" }, fmtModel(row.agent_model)));
+      const subRow = el("div", { style: "display:flex;align-items:center;gap:6px;margin-top:3px" });
+      if (persona) {
+        const cls = persona === "expert" ? "persona-pill persona-expert" : "persona-pill persona-nonexpert";
+        subRow.appendChild(el("span", { class: cls }, persona));
+      }
+      mtd.appendChild(subRow);
+      tr.appendChild(mtd);
+
+      // Mean Win Rate
+      const mwr = row._meanWinRate;
+      const mwrTd = el("td", {});
+      mwrTd.appendChild(el("span", {
+        class: `metric-primary ${scoreClass(mwr)}`,
+      }, fmt(mwr) || "—"));
+      tr.appendChild(mwrTd);
+
+      // Per-dataset columns
+      for (const [dsKey] of Object.entries(datasets)) {
+        const dsData = row.perDataset[dsKey];
+        const td = el("td", {});
+        if (dsData) {
+          const f = fmt(dsData.metricVal);
+          td.appendChild(el("span", { class: f ? "metric-num" : "metric-na" }, f || "—"));
+          if (dsData.winRate != null) {
+            td.appendChild(el("div", {
+              style: "font-size:11px;color:var(--text-3);margin-top:2px;",
+            }, `WR: ${(dsData.winRate * 100).toFixed(0)}%`));
+          }
+
+        } else {
+          td.appendChild(el("span", { class: "metric-na" }, "—"));
+        }
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    });
+
+    tbl.appendChild(tbody);
+    tableWrap.appendChild(tbl);
+    wrap.appendChild(tableWrap);
+    app.appendChild(wrap);
+  }
+
+  // ── Dataset detail view (per-dataset, all metrics) ──────────────────────
+  function renderDataset(app) {
+    const ds = datasets[state.tab];
+    const entries = ds ? (ds.entries || []) : [];
+    attachDatasetWinRates(entries);
+
+    const wrap = el("div", { class: "container" });
+
+    if (entries.length === 0) {
+      const tableWrap = el("div", { class: "table-wrap" });
+      const es = el("div", { class: "empty-state" });
+      es.appendChild(el("div", { class: "empty-state-title" }, "No results for this dataset"));
+      es.appendChild(el("div", { class: "empty-state-desc" }, "Add results with:"));
+      es.appendChild(el("code", { class: "empty-state-cmd" },
+        "python paper_experiments/add_results.py --results-dir <path>"));
+      tableWrap.appendChild(es);
+      wrap.appendChild(tableWrap);
+      app.appendChild(wrap);
+      return;
+    }
+
+    // Sort
+    const def = DETAIL_METRICS.find(m => m.key === state.dsSortCol) || DETAIL_METRICS[0];
+    const sorted = [...entries].sort((a, b) => {
+      const va = def.get(a) ?? -Infinity;
+      const vb = def.get(b) ?? -Infinity;
+      return (va < vb ? -1 : va > vb ? 1 : 0) * state.dsSortDir;
+    });
+
+    const tableWrap = el("div", { class: "table-wrap" });
+    const tbl = el("table");
+    const thead = el("thead");
+    const hrow = el("tr");
+
+    function thSortD(label, metricKey) {
+      const isSorted = metricKey === state.dsSortCol;
+      const th = el("th", {
+        class: "sortable" + (isSorted ? " sorted" : ""),
+        onclick: () => {
+          if (state.dsSortCol === metricKey) state.dsSortDir *= -1;
+          else { state.dsSortCol = metricKey; state.dsSortDir = -1; }
+          render();
+        },
+      }, label, el("span", { class: "arr" },
+        isSorted ? (state.dsSortDir === -1 ? " ↓" : " ↑") : " ↕"));
+      return th;
+    }
+
+    hrow.appendChild(el("th", { class: "col-rank" }, "#"));
+    hrow.appendChild(el("th", {}, "Agent"));
+    DETAIL_METRICS.forEach(m => hrow.appendChild(thSortD(m.label, m.key)));
+    hrow.appendChild(el("th", {}, "Samples"));
+    hrow.appendChild(el("th", {}, "Trials"));
+    hrow.appendChild(el("th", { style: "width:96px" }, ""));
+    thead.appendChild(hrow);
+    tbl.appendChild(thead);
+
+    const tbody = el("tbody");
+    sorted.forEach((entry, idx) => {
+      const rank = idx + 1;
+      const row = el("tr");
+
+      row.appendChild(el("td", { class: "col-rank" },
+        el("span", { class: rank === 1 ? "rank-num rank-1" : "rank-num" }, String(rank))));
+
+      const persona = entry.user_proxy_persona || "";
+      const mtd = el("td", {});
+      mtd.appendChild(el("div", { class: "model-name" }, fmtModel(entry.agent_model)));
+      const subRow = el("div", { style: "display:flex;align-items:center;gap:6px;margin-top:3px" });
+      if (entry.agent) subRow.appendChild(el("span", { class: "model-agent" }, entry.agent));
+      if (persona) {
+        const cls = persona === "expert" ? "persona-pill persona-expert" : "persona-pill persona-nonexpert";
+        subRow.appendChild(el("span", { class: cls }, persona));
+      }
+      mtd.appendChild(subRow);
+      row.appendChild(mtd);
+
+      DETAIL_METRICS.forEach(m => {
+        const val = m.get(entry);
+        const f = fmt(val);
+        const td = el("td", {});
+        if (m.key === state.dsSortCol) {
+          td.appendChild(el("span", { class: `metric-primary ${scoreClass(val)}` }, f || "—"));
+        } else {
+          td.appendChild(el("span", { class: f ? "metric-num" : "metric-na" }, f || "—"));
+        }
+        row.appendChild(td);
+      });
+
+      row.appendChild(el("td", { class: "metric-num" }, String(entry.summary?.n_samples ?? "—")));
+      row.appendChild(el("td", { class: "metric-num" }, String(entry.n_trials ?? "—")));
+      const ltd = el("td", {});
+      const folderName = generateFolderName(entry, state.tab);
+      ltd.appendChild(el("a", {
+        class: "link-btn",
+        href: `details/${folderName}/index.html`,
+      }, "Details →"));
+      row.appendChild(ltd);
+
+      tbody.appendChild(row);
+    });
+
+    tbl.appendChild(tbody);
+    tableWrap.appendChild(tbl);
+    wrap.appendChild(tableWrap);
+    app.appendChild(wrap);
+  }
+
+  // ── Main render ──────────────────────────────────────────────────────────
+  function render() {
+    const app = document.getElementById("app");
+    app.innerHTML = "";
+    app.appendChild(buildTopBar());
+    if (state.view === "global") {
+      renderGlobal(app);
+    } else {
+      renderDataset(app);
+    }
+    if (window._rebuildCharts &&
+        document.getElementById("chart-panel")?.style.display !== "none") {
+      window._rebuildCharts();
+    }
+  }
+
+  render();
+})();
+
+// ── Persona comparison charts ───────────────────────────────────────────────
+(function () {
+  const COLORS = [
+    "#1f77b4","#ff7f0e","#2ca02c","#d62728",
+    "#9467bd","#8c564b","#e377c2","#17becf","#bcbd22","#aec7e8",
+  ];
+  let _charts = {};
+
+  function hatch(color) {
+    const c = document.createElement("canvas");
+    c.width = 8; c.height = 8;
+    const ctx = c.getContext("2d");
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 8); ctx.lineTo(8, 0);
+    ctx.stroke();
+    return ctx.createPattern(c, "repeat");
+  }
+
+  function avg(arr) {
+    const v = (arr || []).filter(x => x != null);
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  }
+
+  function normModel(m) {
+    return (m || "").replace(/^(azure|openai)\//, "");
+  }
+
+  function buildCharts() {
+    const entries = window._getActiveEntries ? window._getActiveEntries() : [];
+
+    // Group by model → persona → [{ auc, ppt }]
+    const modelMap = {};
+    for (const e of entries) {
+      const model = normModel(e.agent_model);
+      if (!model) continue;
+      if (!modelMap[model]) modelMap[model] = {};
+      const persona = (e.user_proxy_persona || "expert") === "expert" ? "expert" : "nonexpert";
+      if (!modelMap[model][persona]) modelMap[model][persona] = [];
+      modelMap[model][persona].push({
+        auc:      e.metrics?.auc_score?.avg_max ?? null,
+        ppt:      e.metrics?.ppt_score?.avg_max ?? null,
+        max_pr:   e.metrics?.max_progress_rate?.avg_max ?? null,
+        mean_pr:  e.metrics?.mean_progress_rate?.avg_max ?? null,
+        pass_k:   e.metrics?.pass_at_k?.avg ?? e.metrics?.["pass@k"]?.avg ?? null,
+        pass_hat: e.metrics?.pass_hat_k?.avg ?? e.metrics?.["pass^k"]?.avg ?? null,
+      });
+    }
+
+    const models = Object.keys(modelMap);
+    if (!models.length) return;
+
+    const barColors = models.map((_, i) => COLORS[i % COLORS.length]);
+
+    function makeDatasets(metric) {
+      const expertData    = models.map(m => avg((modelMap[m].expert    || []).map(x => x[metric])));
+      const nonexpertData = models.map(m => avg((modelMap[m].nonexpert || []).map(x => x[metric])));
+
+      const hasExpert    = expertData.some(v => v != null);
+      const hasNonexpert = nonexpertData.some(v => v != null);
+      const ds = [];
+
+      if (hasExpert) ds.push({
+        label: "Expert",
+        data: expertData,
+        backgroundColor: barColors,
+        borderColor: barColors.map(c => c + "bb"),
+        borderWidth: 1,
+        borderRadius: 2,
+      });
+      if (hasNonexpert) ds.push({
+        label: "Non-Expert",
+        data: nonexpertData,
+        backgroundColor: barColors.map(c => hatch(c)),
+        borderColor: barColors.map(c => c + "bb"),
+        borderWidth: 1,
+        borderRadius: 0,
+      });
+      return ds;
+    }
+
+    const opts = {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            font: { family: "Inter, sans-serif", size: 11 },
+            boxWidth: 14, padding: 12,
+          },
+        },
+        datalabels: {
+          anchor: "end", align: "top", offset: 2,
+          formatter: v => v != null ? v.toFixed(2) : "",
+          font: { family: "Inter, sans-serif", weight: "600", size: 10 },
+          color: "#18181b",
+          clip: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.raw;
+              return v != null ? `${ctx.dataset.label}: ${v.toFixed(3)}` : "";
+            },
+          },
+        },
+      },
+      layout: { padding: { top: 20 } },
+      scales: {
+        x: {
+          ticks: { font: { family: "Inter, sans-serif", size: 11 }, color: "#52525b" },
+          grid: { display: false },
+        },
+        y: {
+          min: 0, max: 1,
+          ticks: { font: { family: "Inter, sans-serif", size: 11 }, color: "#a1a1aa", stepSize: 0.2 },
+          grid: { color: "#f4f4f5" },
+        },
+      },
+    };
+
+    function mkChart(id, metric) {
+      if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      _charts[id] = new Chart(canvas.getContext("2d"), {
+        type: "bar",
+        data: { labels: models, datasets: makeDatasets(metric) },
+        options: opts,
+        plugins: [ChartDataLabels],
+      });
+    }
+
+    mkChart("chart-auc",      "auc");
+    mkChart("chart-ppt",      "ppt");
+    mkChart("chart-max-pr",   "max_pr");
+    mkChart("chart-mean-pr",  "mean_pr");
+    mkChart("chart-pass-k",   "pass_k");
+    mkChart("chart-pass-hat", "pass_hat");
+  }
+
+  window._rebuildCharts = buildCharts;
+
+  window.toggleChart = function () {
+    const panel = document.getElementById("chart-panel");
+    const btn   = document.getElementById("compare-btn");
+    if (panel.style.display === "none") {
+      panel.style.display = "block";
+      btn.classList.add("active");
+      buildCharts();
+    } else {
+      panel.style.display = "none";
+      btn.classList.remove("active");
+    }
+  };
+})();
+</script>
+
+</body>
+</html>
