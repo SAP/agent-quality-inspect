@@ -1,6 +1,6 @@
 # AgentInspect
 
-## Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis
+## Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis (ICLR 2026)
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
