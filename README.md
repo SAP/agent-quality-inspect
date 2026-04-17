@@ -1,4 +1,4 @@
-# AgentInspect
+# Agent Quality Inspect
 
 ## Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis
 
@@ -110,6 +110,10 @@ The standard flow of using it as a metrics package is as follows:
 
 ```bash
 pip install git+https://github.com/SAP/agent-quality-inspect.git
+
+or
+
+pip install agent-quality-inspect
 ```
 
 2. Define your evaluation sample and agent trace.
@@ -119,6 +123,8 @@ pip install git+https://github.com/SAP/agent-quality-inspect.git
 6. Visualize the error analysis results in the Streamlit UI.
    
 Example: constructing a minimal trace and computing an AUC score with the metrics package: Run the script using `streamlit run <script>.py`.
+
+**Important Note:** To import our package library use `from agent_inspect import ..`
 
 ```python
 from typing import List
