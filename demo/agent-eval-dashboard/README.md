@@ -29,7 +29,7 @@ All commands should be run from the repository root (`agent-inspect/`).
 ### Download dataset
 
 ```bash
-python demo/agent-eval-dashboard/scripts/download_hf_dataset.py --output-dir demo/agent-eval-dashboard/example-dataset
+python paper_experiments/download_hf_dataset.py --output-dir demo/agent-eval-dashboard/example-dataset
 ```
 
 ### Fully Recreate Dashboard
