@@ -33,14 +33,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 # Import StatisticAnalysis directly to avoid client dependencies
 # (which require backoff module that may not be installed)
-import importlib.util
-spec = importlib.util.spec_from_file_location(
-    "statistic_analysis",
-    REPO_ROOT / "src" / "agent_inspect" / "tools" / "error_analysis" / "statistic_analysis.py"
-)
-statistic_analysis_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(statistic_analysis_module)
-StatisticAnalysis = statistic_analysis_module.StatisticAnalysis
+from agent_inspect.tools.error_analysis.statistic_analysis import StatisticAnalysis
 
 from .shared_styles import SHARED_CSS, esc, fmt, fmt_model, slugify
 

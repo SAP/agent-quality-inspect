@@ -25,7 +25,6 @@ from typing import Any, Dict, List, Optional
 from .shared_styles import SHARED_CSS, esc, fmt, fmt_model, badge, slugify
 from .generate_error_analysis_pages import generate_error_analysis_pages, generate_folder_name
 
-REPO_ROOT = Path(__file__).parent.parent.parent.parent.parent
 DASHBOARD_ROOT = Path(__file__).parent.parent.parent  # demo/agent-eval-dashboard
 DETAILS_BASE = DASHBOARD_ROOT / "leaderboard" / "details"
 
