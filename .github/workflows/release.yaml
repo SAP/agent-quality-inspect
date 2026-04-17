@@ -23,7 +23,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          PYTHONPATH=agent_inspect python -m pytest --cov=agent_inspect
+          PYTHONPATH=agent_inspect python -m pytest --cov=agent_inspect tests
 
   release-build:
     needs: unit-tests
