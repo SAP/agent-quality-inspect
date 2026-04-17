@@ -352,7 +352,7 @@ tbody td { padding: 12px 16px; vertical-align: middle; }
 <div class="container">
   <header class="page-header">
     <h1 class="page-title">Evaluation Leaderboard</h1>
-    <p class="page-sub">Benchmark results across model configurations. Add results via <code>python paper_experiments/add_results.py</code>.</p>
+    <p class="page-sub">Benchmark results across model configurations. Add results via <code>python demo/agent-eval-dashboard/scripts/add_results.py</code>.</p>
   </header>
 </div>
 
@@ -361,7 +361,7 @@ tbody td { padding: 12px 16px; vertical-align: middle; }
   <div id="no-data">
     <h2>No results yet</h2>
     <p>Run the import script to add your first experiment:</p>
-    <code>python paper_experiments/add_results.py \
+    <code>python demo/agent-eval-dashboard/scripts/add_results.py \
   --results-dir paper_experiments/experiment_outputs_YYYYMMDD</code>
     <p class="hint">Then reload this page.</p>
   </div>
@@ -817,7 +817,7 @@ tbody td { padding: 12px 16px; vertical-align: middle; }
       es.appendChild(el("div", { class: "empty-state-title" }, "No results for this dataset"));
       es.appendChild(el("div", { class: "empty-state-desc" }, "Add results with:"));
       es.appendChild(el("code", { class: "empty-state-cmd" },
-        "python paper_experiments/add_results.py --results-dir <path>"));
+        "python demo/agent-eval-dashboard/scripts/add_results.py --results-dir <path>"));
       tableWrap.appendChild(es);
       wrap.appendChild(tableWrap);
       app.appendChild(wrap);

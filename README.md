@@ -23,7 +23,7 @@ Documentation Link: https://sap.github.io/agent-quality-inspect/
     - [Option 1. Using it as a Metrics Package](#option-1-using-it-as-a-metrics-package)
     - [Option 2. Using it via the provided runners](#option-2-using-it-via-the-provided-runners)
     - [Viewing Results](#viewing-results)
-    - [Error Diagnosis UI](#error-diagnosis-ui)
+    - [Agents Leaderboard UI](#agents-leaderboard)
   - [Bring Your Own Agent](#bring-your-own-agent)
     - [Creating your own evaluation dataset](#creating-your-own-evaluation-dataset)
   - [Known Issues](#known-issues)
@@ -137,7 +137,6 @@ from agent_inspect.models.metrics.agent_trace import (
 from agent_inspect.models.metrics.agent_data_sample import EvaluationSample, SubGoal
 from agent_inspect.models.tools import ErrorAnalysisDataSample
 from agent_inspect.tools import ErrorAnalysis
-from demo.ui_for_agent_diagnosis.app import launch_ui
 
 
 # Create LLM client (requires env vars: AZURE_API_VERSION, AZURE_API_BASE, AZURE_API_KEY)
@@ -214,16 +213,7 @@ for i, category in enumerate(error_categories, 1):
     count = len(error_analysis_result.analyzed_validations_clustered_by_errors[category])
     print(f"  {i}. {category} ({count} occurrences)")
 print(f"Completed validations: {len(error_analysis_result.completed_subgoal_validations)}")
-
-
-# Step 4: Launch UI for visualization
-launch_ui(
-    error_analysis_result=error_analysis_result,
-    data_samples=error_analysis_data_samples
-)
 ```
-
-For more information on viewing error analysis UI [demo/ui_for_agent_diagnosis/readme.md](demo/ui_for_agent_diagnosis/readme.md).
 
 
 ### Option 2. Using it via the provided runners
@@ -253,24 +243,36 @@ For each run, the [paper_experiments](paper_experiments/readme.md) runner create
 - `trial_<N>_results.json`: Per-trial, per-sample trajectories and metrics (AUC, PPT, turn counts, success flags).
 - `aggregate_metrics_results.json`: Aggregate metrics (e.g., MaxAUC@k, MaxPPT@k) across all trials.
 - `evaluation_results.pkl`: Serialized evaluation results.
-- `error_analysis.pkl`: Serialized error analysis inputs and outputs used by the diagnosis UI.
+- `error_analysis.pkl`: Serialized error analysis inputs and outputs used by the leaderboard UI.
 - `evaluation.log`: Detailed logs for debugging and auditing. -->
 
 See [paper_experiments/readme.md](paper_experiments/readme.md) for a full description of the output format.
 
-### Error Diagnosis UI
+### Agents Leaderboard
 
-To explore error analysis for a specific experiment run in a browser UI, you can launch the Streamlit viewer.
+You may also view the results of evaluation using our leaderboard UI at `demo/agent-eval-dashboard`. 
+To add your experiment results to the leaderboard, you can follow these steps:
+
+1. First, add the result to the leaderboard using the `add_results.py` script via the following command:
 
 ```bash
-python -m streamlit run paper_experiments/view_results.py -- --output-dir paper_experiments/experiment_outputs_<timestamp>
+python demo/agent-eval-dashboard/scripts/add_results.py --results-dir <path-to-experiment-output>
+
+# Example
+python demo/agent-eval-dashboard/scripts/add_results.py --results-dir paper_experiments/experiment_outputs_17042026
+
 ```
 
-Replace `<timestamp>` with the actual timestamp of your output directory. This loads the pickled results and starts a Streamlit app at `http://localhost:8501` that visualizes error categories and per-sample diagnostics. More details are in [paper_experiments/readme.md](paper_experiments/readme.md).
+2. Then, to view the dashboard locally, run the following command:
 
-### Download Pre-computed Results from HuggingFace
+```bash
+open demo/agent-eval-dashboard/leaderboard/index.html
+```
 
-We provide pre-computed experiment results on HuggingFace so you can explore the error diagnosis UI without running the full evaluation pipeline yourself.
+See [demo/agent-eval-dashboard/README.md](demo/agent-eval-dashboard/README.md) for more details.
+### Download and View Pre-computed Results from HuggingFace
+
+We also provide pre-computed experiment results on HuggingFace so that you can explore the results without running the full evaluation pipeline yourself.
 
 **1. Install the HuggingFace `huggingface_hub` library** (if not already installed):
 
@@ -281,42 +283,25 @@ pip install huggingface_hub
 **2. Download the dataset using the provided script:**
 
 ```bash
-python paper_experiments/download_hf_dataset.py --output-dir <path-to-output-folder>
-```
-
-To download a specific file:
-
-```bash
-python paper_experiments/download_hf_dataset.py --filename <filename> --output-dir <path-to-output-folder>
+python paper_experiments/download_hf_dataset.py --output-dir downloaded-dataset
 ```
 
 See [paper_experiments/download_hf_dataset.py](paper_experiments/download_hf_dataset.py) for all available options (`--repo-id`, `--repo-type`, etc.).
 
-**3. Run error diagnosis on the downloaded results:**
+**3. Run agent leaderboard on the downloaded results:**
 
-Once you have downloaded the results, you can launch the Error Diagnosis UI to explore the pre-computed error analysis. Point the Streamlit viewer at the downloaded output directory:
+Once you have downloaded the results, you can view them by using our agent leaderboard UI. To do this. 
 
-```bash
-python -m streamlit run paper_experiments/view_results.py -- --output-dir <path-to-downloaded-results>
-```
-
-Example command:
+1. First add the downloaded results to the leaderboard via the following command (assuming that you downloaded the dataset to `downloaded-dataset` folder):
 
 ```bash
-python -m streamlit run paper_experiments/view_results.py -- --output-dir dataset/tau2bench/airline/gpt_4_1/expert
+./demo/agent-eval-dashboard/scripts/recreate_dashboard.sh downloaded-dataset
 ```
 
-This loads the `error_analysis.pkl` file from the downloaded results and starts a Streamlit app at `http://localhost:8501` where you can interactively browse error categories and per-sample diagnostics.
+2. Then, to view the dashboard locally, run the following command:
 
-If you want to re-run the error analysis programmatically on the downloaded data, you can do so in Python:
-
-```python
-from agent_inspect.tools import ErrorAnalysis
-from agent_inspect.models.tools import ErrorAnalysisDataSample
-
-# Load the downloaded data samples
-error_analyzer = ErrorAnalysis(llm_client=client, max_workers=3)
-error_analysis_result = error_analyzer.analyze_batch(error_analysis_data_samples)
+```bash
+open demo/agent-eval-dashboard/leaderboard/index.html
 ```
 
 ## Bring Your Own Agent
