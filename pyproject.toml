@@ -5,8 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agent_inspect"
 version = "2.0.0a1"
-description = ""
-authors = []
+description = "Evaluation package that allows benchmarking of agentic AIs from various sources and frameworks by producing statistical results which can be compared across different use cases and datasets."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+    { name="Marcus Duigan", email="marcus.duigan@sap.com" },
+    { name="Min Pyae Moe", email="min.pyae.moe@sap.com" }
+]
 dynamic = ["dependencies"]
 
 [tool.setuptools.dynamic]
