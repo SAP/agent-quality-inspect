@@ -137,4 +137,4 @@ python demo/agent-eval-dashboard/scripts/add_results.py --results-dir paper_expe
 open demo/agent-eval-dashboard/leaderboard/index.html
 ```
 
-See [demo/agent-eval-dashboard/README.md](demo/agent-eval-dashboard/README.md) for more details.
+See [demo/agent-eval-dashboard/README.md](demo/agent-eval-dashboard/README.md) for more details to view error analysis results.
