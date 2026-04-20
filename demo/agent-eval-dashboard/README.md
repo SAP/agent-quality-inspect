@@ -26,6 +26,12 @@ agent-eval-dashboard/
 
 All commands should be run from the repository root (`agent-inspect/`).
 
+### Install the package in editable mode:
+
+```bash
+pip install -e .
+```
+
 ### Download dataset
 
 ```bash
@@ -82,6 +88,22 @@ python demo/agent-eval-dashboard/scripts/add_results.py --batch demo/agent-eval-
 ```bash
 open demo/agent-eval-dashboard/leaderboard/index.html
 ```
+
+### Viewing Error Analysis
+
+If your dataset has error analysis results, you can view them by following the below steps.
+
+1. Select your added dataset from the dropdown menu on the dashboard indicated by the red arrow in the screenshot below.
+
+![ea_1.png](ea_1.png)
+
+2. Then click on the `Details` button for the entry you want to view the error analysis for, indicated by the red arrow in the screenshot below.
+
+![ea_2.png](ea_2.png)
+
+3. Finally, click on the `View Error Analysis` button indicated by the red arrow in the screenshot below.
+
+![ea_3.png](ea_3.png)
 
 ### Delete an Entry
 

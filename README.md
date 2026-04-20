@@ -116,7 +116,7 @@ pip install git+https://github.com/SAP/agent-quality-inspect.git
 3. Evaluate the progress rates using the evaluation sample on your agent trace.
 4. Using the output of the Step 3, calculate any of the metric scores (AUC, PPT, pass@k, etc.).
 5. Optionally, run the error analysis on the outputs of previous steps.
-6. Visualize the error analysis results in the Streamlit UI.
+6. Visualize the error analysis results via agents leaderboard.
    
 Example: constructing a minimal trace and computing an AUC score with the metrics package: Run the script using `streamlit run <script>.py`.
 

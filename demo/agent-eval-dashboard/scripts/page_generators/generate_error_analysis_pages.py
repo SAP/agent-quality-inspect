@@ -368,7 +368,7 @@ def build_error_summary_table(error_data: Dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 # HTML Page Builder
 # ---------------------------------------------------------------------------
-from css_for_html_page import ERROR_ANALYSIS_CSS
+from .css_for_html_page import ERROR_ANALYSIS_CSS
 
 def build_error_analysis_page(
     entry: Dict[str, Any],

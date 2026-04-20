@@ -116,22 +116,25 @@ Results are saved in `paper_experiments/experiment_outputs_<timestamp>/` with th
 
 5. **`evaluation.log`** - Detailed execution logs
 
-## Error Analysis UI
+## Agents Leaderboard
 
-View detailed error analysis results in an interactive Streamlit UI:
+You may also view the results of evaluation using our leaderboard UI at `demo/agent-eval-dashboard`. 
+To add your experiment results to the leaderboard, you can follow these steps:
 
-```bash
-python -m streamlit run paper_experiments/view_results.py -- --output-dir paper_experiments/experiment_outputs_<timestamp>
-```
-
-Replace `<timestamp>` with the actual timestamp from your output directory (e.g., `experiment_outputs_20260116_143022`).
-
-### Example
-
-If your results are in `paper_experiments/experiment_outputs_20260116_143022/`:
+1. First, add the result to the leaderboard using the `add_results.py` script via the following command:
 
 ```bash
-python -m streamlit run paper_experiments/view_results.py -- --output-dir paper_experiments/experiment_outputs_20260116_143022
+python demo/agent-eval-dashboard/scripts/add_results.py --results-dir <path-to-experiment-output>
+
+# Example
+python demo/agent-eval-dashboard/scripts/add_results.py --results-dir paper_experiments/experiment_outputs_17042026
+
 ```
 
-The Streamlit app will launch in your browser at `http://localhost:8501`.
+2. Then, to view the dashboard locally, run the following command:
+
+```bash
+open demo/agent-eval-dashboard/leaderboard/index.html
+```
+
+See [demo/agent-eval-dashboard/README.md](demo/agent-eval-dashboard/README.md) for more details.
