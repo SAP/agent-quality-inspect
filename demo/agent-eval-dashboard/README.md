@@ -1,0 +1,177 @@
+# Agent Eval Dashboard
+
+A dashboard for visualizing and comparing agent evaluation results across different agents, benchmarks and models.
+
+![Agents Leaderboard.png](Agents%20Leaderboard.png)
+
+## Directory Structure
+
+```
+agent-eval-dashboard/
+├── leaderboard_data.json      # Master data file with all experiment entries
+├── leaderboard/               # Static HTML dashboard
+│   ├── index.html             # Main dashboard page
+│   ├── leaderboard_data.js    # JS data file (auto-generated)
+│   ├── details/               # Per-entry detail pages
+│   └── error_analysis/        # Per-entry error analysis pages
+└── scripts/                   # Management scripts
+    ├── add_results.py
+    ├── download_hf_dataset.py
+    ├── regenerate_detail_pages.py
+    ├── regenerate_error_analysis_pages.py
+    └── page_generators/       # HTML generation modules
+```
+
+## Commands
+
+All commands should be run from the repository root (`agent-inspect/`).
+
+### Install the package in editable mode:
+
+```bash
+pip install -e .
+```
+
+### Download dataset
+
+```bash
+python paper_experiments/download_hf_dataset.py --output-dir demo/agent-eval-dashboard/example-dataset
+```
+
+### Fully Recreate Dashboard
+
+To recreate the entire dashboard from scratch with the downloaded datasets:
+
+```bash
+# Using Downloaded Dataset (default)
+./demo/agent-eval-dashboard/scripts/recreate_dashboard.sh demo/agent-eval-dashboard/example-dataset
+```
+
+This script will:
+- Process tau2bench/airline → Create "Tau2Bench – Airline" dataset
+- Process tau2bench/retail → Create "Tau2Bench – Retail" dataset
+- Process toolsandbox → Create "ToolSandbox" dataset
+
+### Add Experiment Results
+
+Add results from an experiment output folder to the leaderboard:
+
+
+```bash
+# Interactive mode (prompts for path)
+python demo/agent-eval-dashboard/scripts/add_results.py
+
+# Specify path directly
+python demo/agent-eval-dashboard/scripts/add_results.py --results-dir <path-to-experiment-output>
+
+# Batch mode - add all experiments under a parent directory
+python demo/agent-eval-dashboard/scripts/add_results.py --batch <parent-directory>
+```
+
+**Examples:**
+```bash
+# Single experiment
+python demo/agent-eval-dashboard/scripts/add_results.py --results-dir demo/agent-eval-dashboard/example-dataset/tau2bench/airline/gpt_4_1/expert
+
+# Batch - add all experiments in a directory
+python demo/agent-eval-dashboard/scripts/add_results.py --batch demo/agent-eval-dashboard/example-dataset/tau2bench/airline
+```
+
+**Single mode** will:
+1. Display experiment summary (model, metrics, etc.)
+2. Ask for confirmation to add
+3. Prompt to select or create a dataset
+4. Generate detail pages and error analysis pages (if `error_analysis.pkl` exists)
+5. Update `leaderboard_data.json` and `leaderboard_data.js`
+
+### View the Dashboard
+```bash
+open demo/agent-eval-dashboard/leaderboard/index.html
+```
+
+### Viewing Error Analysis
+
+If your dataset has error analysis results, you can view them by following the below steps.
+
+1. Select your added dataset from the dropdown menu on the dashboard indicated by the red arrow in the screenshot below.
+
+![ea_1.png](ea_1.png)
+
+2. Then click on the `Details` button for the entry you want to view the error analysis for, indicated by the red arrow in the screenshot below.
+
+![ea_2.png](ea_2.png)
+
+3. Finally, click on the `View Error Analysis` button indicated by the red arrow in the screenshot below.
+
+![ea_3.png](ea_3.png)
+
+### Delete an Entry
+
+Interactively delete an entry from the leaderboard:
+
+```bash
+python demo/agent-eval-dashboard/scripts/add_results.py --delete
+```
+
+This will:
+1. List all entries with their details
+2. Prompt you to select an entry to delete
+3. Ask for confirmation
+4. Remove the entry from `leaderboard_data.json`
+5. Update `leaderboard_data.js`
+6. Delete generated pages:
+   - `leaderboard/details/{folder_name}/` (detail pages)
+   - `leaderboard/error_analysis/{folder_name}/` (error analysis pages)
+7. Remove the dataset entirely if no entries remain
+
+**Note:** The original experiment output folder (`source_folder`) is **not** deleted. Only the dashboard entry and generated HTML pages are removed.
+
+### Regenerate Detail Pages
+
+Regenerate all detail pages for existing entries (useful after code changes):
+
+```bash
+python demo/agent-eval-dashboard/scripts/regenerate_detail_pages.py
+```
+
+### Regenerate Error Analysis Pages
+
+Regenerate all error analysis pages for entries that have `error_analysis.pkl`:
+
+```bash
+python demo/agent-eval-dashboard/scripts/regenerate_error_analysis_pages.py
+```
+
+## Expected Experiment Output Structure
+
+If you would like to run our dashboard with the generated result form our evalution runner, the `--results-dir` should point to the folder containing:
+
+```
+experiment_output_folder/
+├── aggregate_metrics_results.json   # Required - contains metrics and metadata
+├── trial_0_results.json             # Trial results (one per trial)
+├── trial_1_results.json
+├── ...
+└── error_analysis.pkl               # Optional - enables error analysis pages
+```
+
+## Data Files
+
+- **`leaderboard_data.json`**: Master data file containing all entries with full metrics (including per-sample data). Used by scripts.
+
+- **`leaderboard/leaderboard_data.js`**: Slim version of the data (aggregate metrics only) embedded as JS for the dashboard. Auto-generated by scripts.
+
+## Troubleshooting
+
+**Dashboard not updating after adding results?**
+- The scripts automatically update `leaderboard_data.js`. Try refreshing the browser or clearing cache.
+
+**Detail pages not found?**
+- Run `python demo/agent-eval-dashboard/scripts/regenerate_detail_pages.py`
+
+**Error analysis pages missing?**
+- Ensure `error_analysis.pkl` exists in the experiment output folder
+- Run `python demo/agent-eval-dashboard/scripts/regenerate_error_analysis_pages.py`
+
+**Source folder not found errors?**
+- The `source_folder` path in entries is absolute. If you moved experiment outputs, you'll need to update the paths in `leaderboard_data.json` or re-add the results.
