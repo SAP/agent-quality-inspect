@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agent_inspect.tools.error_analysis.statistic_analysis &mdash; agent_inspect 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            agent_inspect
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">agent_inspect</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">agent_inspect</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">agent_inspect.tools.error_analysis.statistic_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for agent_inspect.tools.error_analysis.statistic_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.exception.error_codes</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCode</span><span class="p">,</span> <span class="n">ToolComponent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidInputValueError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.tools.analysis_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorAnalysisDataSample</span><span class="p">,</span> <span class="n">StatisticAnalysisResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.utils.metrics_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_subgoal_validations_to_binary_matrix</span>
+
+
+
+<div class="viewcode-block" id="StatisticAnalysis">
+<a class="viewcode-back" href="../../../../agent_inspect.tools.error_analysis.html#agent_inspect.tools.StatisticAnalysis">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StatisticAnalysis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method to compute expectation and variance of agent&#39;s progress across multiple LLM-as-a-judge runs.</span>
+
+<span class="sd">    For each subgoal :math:`g_{i,j} \in G_i`, we define a binary random variable :math:`Z_{i,j}`, where :math:`Z_{i,j}=1` if the agent achieves the :math:`j`-th subgoal (under the given trajectory), and :math:`0` otherwise.</span>
+
+<span class="sd">    Let the probability of achieving the subgoal :math:`g_{i,j}` be :math:`Pr(Z_{i,j}=1)=z_{i,j}`. Then, for a given sample with multiple subgoals :math:`(i, G_i)` and an agent trajectory :math:`\\tau_i`, we define the progress as the proportion of subgoals successfully achieved :math:`progress(i, G_i, \\tau_i) = \\frac{\sum_j Z_{i,j}}{|G_i|}`.</span>
+
+<span class="sd">    So the expectation and variance of agent&#39;s progress are measured by:</span>
+<span class="sd">    </span>
+<span class="sd">    .. math::</span>
+
+<span class="sd">        E[{progress}(i, G_i, \\tau_i)] = \\frac{\sum_j z_{i,j}}{|G_i|} \ ; \quad</span>
+<span class="sd">        {Var}[{progress}(i, G_i, \\tau_i)] = \\frac{\sum_j z_{i,j} (1 - z_{i,j})}{|G_i|^2}</span>
+
+
+<span class="sd">    where :math:`z_{i,j}= \\frac{1}{Q}\sum_{q=1}^Q z_{i,j}^{(q)}` is estimated by averaging over :math:`Q` judge runs per subgoal, generalizing the single binary judge output to a probabilistic estimate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_probabilities</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate probability for each subgoal by computing the mean of each inner list.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            binary_matrix: 2D list where inner lists cannot have different lengths.</span>
+<span class="sd">                          Each inner list represents judge scores for a subgoal.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List of probabilities (means) for each subgoal.</span>
+<span class="sd">        </span>
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; binary_matrix = [[1, 1, 1, 1, 1], [1, 0, 1, 0, 1], [0, 0, 0, 0, 0]]</span>
+<span class="sd">            &gt;&gt;&gt; calculate_probabilities(binary_matrix)</span>
+<span class="sd">            [1.0, 0.6, 0.0]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if binary_matrix is empty</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">binary_matrix</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidInputValueError</span><span class="p">(</span>
+                    <span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">MISSING_VALUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">component_code</span><span class="o">=</span><span class="n">ToolComponent</span><span class="o">.</span><span class="n">TOOL_ERROR_CODE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Binary matrix cannot be empty.&quot;</span>
+                <span class="p">)</span>
+        
+        <span class="c1"># Check if matrix is homogeneous (all inner lists have same length)</span>
+        <span class="n">first_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subgoal_scores</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">binary_matrix</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subgoal_scores</span><span class="p">)</span> <span class="o">!=</span> <span class="n">first_length</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidInputValueError</span><span class="p">(</span>
+                    <span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">INVALID_VALUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">component_code</span><span class="o">=</span><span class="n">ToolComponent</span><span class="o">.</span><span class="n">TOOL_ERROR_CODE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Binary matrix must be homogeneous. Expected all inner lists to have same length. Ensure that you run our metrics by disabling judge optimization.&quot;</span>
+                <span class="p">)</span>
+        
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">subgoal_scores</span> <span class="ow">in</span> <span class="n">binary_matrix</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subgoal_scores</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidInputValueError</span><span class="p">(</span>
+                    <span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">MISSING_VALUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">component_code</span><span class="o">=</span><span class="n">ToolComponent</span><span class="o">.</span><span class="n">TOOL_ERROR_CODE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Subgoal must have at least 1 judge scores to compute probability.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">probability</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">subgoal_scores</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">subgoal_scores</span><span class="p">)</span>
+                <span class="n">probabilities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">probability</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">probabilities</span>
+
+<div class="viewcode-block" id="StatisticAnalysis.compute_statistic_analysis_result">
+<a class="viewcode-back" href="../../../../agent_inspect.tools.error_analysis.html#agent_inspect.tools.StatisticAnalysis.compute_statistic_analysis_result">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_statistic_analysis_result</span><span class="p">(</span><span class="n">data_sample</span><span class="p">:</span> <span class="n">ErrorAnalysisDataSample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StatisticAnalysisResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the judge expectation and variance on a single data sample.</span>
+<span class="sd">        </span>
+<span class="sd">        :param data_sample: The data sample containing subgoal validations.</span>
+<span class="sd">        :return: an :obj:`~agent_inspect.models.tools.analysis_models.StatisticAnalysisResult` containing judge expectation and variance.</span>
+<span class="sd">        </span>
+<span class="sd">        Example:</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; from agent_inspect.models.tools import ErrorAnalysisDataSample</span>
+<span class="sd">        &gt;&gt;&gt; from agent_inspect.models.metrics import SubGoalValidationResult</span>
+<span class="sd">        &gt;&gt;&gt; from agent_inspect.tools import StatisticAnalysis</span>
+<span class="sd">        &gt;&gt;&gt; data_sample = ErrorAnalysisDataSample(</span>
+<span class="sd">        ...     data_sample_id=1,</span>
+<span class="sd">        ...     agent_run_id=101,</span>
+<span class="sd">        ...     subgoal_validations=[</span>
+<span class="sd">        ...         # The first element is the summarized explanation, skipped in computation. The rest are truncated judge explanations for demo, which only contain &quot;Grade: I&quot; or &quot;Grade: C&quot;.</span>
+<span class="sd">        ...         SubGoalValidationResult(</span>
+<span class="sd">        ...             explanations=[&quot;Check: {subgoal 1} has failed.&#39;&quot;, &quot;Grade: I&quot;, &quot;Grade: I&quot;, &quot;Grade: I&quot;, &quot;Grade: I&quot;, &quot;Grade: C&quot;]</span>
+<span class="sd">        ...         ),</span>
+<span class="sd">        ...         SubGoalValidationResult(</span>
+<span class="sd">        ...             explanations=[&quot;Check: {subgoal 2} has failed.&#39;&quot;, &quot;Grade: I&quot;, &quot;Grade: I&quot;, &quot;Grade: I&quot;, &quot;Grade: I&quot;, &quot;Grade: I&quot;]</span>
+<span class="sd">        ...         )</span>
+<span class="sd">        ...     ]</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; stat_result = StatisticAnalysis.compute_statistic_analysis_result(data_sample)</span>
+<span class="sd">        &gt;&gt;&gt; stat_result.judge_expectation</span>
+<span class="sd">        0.1</span>
+<span class="sd">        &gt;&gt;&gt; stat_result.judge_std</span>
+<span class="sd">        0.2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">judger_binary_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data_sample</span><span class="o">.</span><span class="n">subgoal_validations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">StatisticAnalysisResult</span><span class="p">(</span>
+                <span class="n">data_sample_id</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">data_sample_id</span><span class="p">,</span>
+                <span class="n">agent_run_id</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">agent_run_id</span><span class="p">,</span>
+                <span class="n">subgoal_validations</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">subgoal_validations</span><span class="p">,</span>
+                <span class="n">judge_expectation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">judge_std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">subgoal_validation</span> <span class="ow">in</span> <span class="n">data_sample</span><span class="o">.</span><span class="n">subgoal_validations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subgoal_validation</span><span class="o">.</span><span class="n">explanations</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidInputValueError</span><span class="p">(</span><span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">MISSING_VALUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">component_code</span><span class="o">=</span><span class="n">ToolComponent</span><span class="o">.</span><span class="n">TOOL_ERROR_CODE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Each SubGoalValidationResult must contain at least one judge explanation besides the summarized one.&quot;</span><span class="p">)</span>
+            <span class="n">one_subgoal_judge_score</span> <span class="o">=</span> <span class="n">map_subgoal_validations_to_binary_matrix</span><span class="p">(</span><span class="n">subgoal_validation</span><span class="o">.</span><span class="n">explanations</span><span class="p">[</span><span class="mi">1</span><span class="p">::])</span> <span class="c1"># Skip the first explanation which is the summarized one</span>
+            <span class="n">judger_binary_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">one_subgoal_judge_score</span><span class="p">)</span>
+        
+        <span class="c1"># Convert to numpy array for easier computation</span>
+        <span class="c1"># Shape: (num_subgoals, num_judges) [[1, 2], [1, 2, 3]]</span>
+        <span class="n">subgoal_means</span> <span class="o">=</span> <span class="n">StatisticAnalysis</span><span class="o">.</span><span class="n">calculate_probabilities</span><span class="p">(</span><span class="n">judger_binary_matrix</span><span class="p">)</span>
+        <span class="c1"># Calculate expectation (mean) across all judges for each subgoal</span>
+        <span class="c1"># Then take the mean across all subgoals</span>
+        <span class="n">overall_expectation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subgoal_means</span><span class="p">)</span>  <span class="c1"># Mean across all subgoals subgoal len of outer array(binary matrix) </span>
+        <span class="c1"># Calculate aggregated standard deviation</span>
+        <span class="c1"># Following the formula: sqrt(sum(pi * (1 - pi)) / n^2)</span>
+        <span class="c1"># where pi are the mean across judges for each subgoal and n is the total count</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">aggregate_sd</span><span class="p">(</span><span class="n">pi</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">std</span>
+        <span class="n">aggregated_std</span> <span class="o">=</span> <span class="n">aggregate_sd</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">subgoal_means</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">StatisticAnalysisResult</span><span class="p">(</span>
+            <span class="n">data_sample_id</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">data_sample_id</span><span class="p">,</span>
+            <span class="n">agent_run_id</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">agent_run_id</span><span class="p">,</span>
+            <span class="n">subgoal_validations</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">subgoal_validations</span><span class="p">,</span>
+            <span class="n">judge_expectation</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">overall_expectation</span><span class="p">),</span>
+            <span class="n">judge_std</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">aggregated_std</span><span class="p">),</span>
+        <span class="p">)</span></div>
+</div>
+
+    
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, &#34;&#34;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

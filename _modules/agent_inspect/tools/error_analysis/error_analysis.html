@@ -1,0 +1,416 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agent_inspect.tools.error_analysis.error_analysis &mdash; agent_inspect 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            agent_inspect
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">agent_inspect</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">agent_inspect</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">agent_inspect.tools.error_analysis.error_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for agent_inspect.tools.error_analysis.error_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.exception.error_codes</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorCode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.tools.analysis_models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorAnalysisDataSample</span><span class="p">,</span> <span class="n">AnalyzedSubgoalValidation</span><span class="p">,</span> <span class="n">ErrorAnalysisResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.metrics.validation_result</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubGoalValidationResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.llm_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMPayload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.clients.llm_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">STATUS_200</span><span class="p">,</span> <span class="n">MAX_RETRY_JSON_DECODE_ERROR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.utils.metrics_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">tally_votes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.tools.error_analysis.llm_constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">UNSUPERVISED_ERROR_SUMMARIZATION_PROMPT_TEMPLATE</span><span class="p">,</span>
+    <span class="n">ERROR_SUMMARIZATION_OUTPUT_SCHEMA</span><span class="p">,</span>
+    <span class="n">MAJORITY_VOTE_PROMPT_TEMPLATE</span><span class="p">,</span>
+    <span class="n">MAJORITY_VOTE_OUTPUT_SCHEMA</span><span class="p">,</span>
+    <span class="n">CLUSTERING_PROMPT_TEMPLATE</span><span class="p">,</span>
+    <span class="n">CLUSTERING_OUTPUT_SCHEMA</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="ErrorAnalysis">
+<a class="viewcode-back" href="../../../../agent_inspect.tools.error_analysis.html#agent_inspect.tools.ErrorAnalysis">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ErrorAnalysis</span><span class="p">:</span>
+    <span class="c1">#TODO: 20 workers is an arbitrary choice need to further tune based on performance testing</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method to perform error analysis across multiple data samples using LLMs in order for developers to easily identify and understand common errors of agents. The method is based on subgoal validations and will execute a two-step unsupervised learning process: 1) low-level error identification, 2) semantic clustering of error types.</span>
+<span class="sd">    </span>
+<span class="sd">    :param llm_client: the client which allows connection to the LLM model for performing error analysis.</span>
+<span class="sd">    :param max_workers: Maximum number of concurrent workers for processing data samples. Default to ``20``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">llm_client</span><span class="p">:</span> <span class="n">LLMClient</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">llm_client</span> <span class="o">=</span> <span class="n">llm_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">executor</span> <span class="o">=</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="ErrorAnalysis.analyze_batch">
+<a class="viewcode-back" href="../../../../agent_inspect.tools.error_analysis.html#agent_inspect.tools.ErrorAnalysis.analyze_batch">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ErrorAnalysisDataSample</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ErrorAnalysisResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs error analysis on a batch of data samples (usually across the entire dataset samples).</span>
+<span class="sd">        Returns the :obj:`~agent_inspect.models.tools.analysis_models.ErrorAnalysisResult` containing the clustered error types with their associated subgoal validations and the rest of subgoal validations that don&#39;t have errors.</span>
+<span class="sd">        </span>
+<span class="sd">        :param data_samples: List of data samples to perform error analysis on. Each data sample contains multiple subgoal validations.</span>
+<span class="sd">        :return: an :obj:`~agent_inspect.models.tools.analysis_models.ErrorAnalysisResult` containing the error analysis results:</span>
+<span class="sd">        </span>
+<span class="sd">            - :obj:`~agent_inspect.models.tools.analysis_models.ErrorAnalysisResult.analyzed_validations_clustered_by_errors`: Dictionary mapping clustered error types to lists of incomplete subgoal validations exhibiting those errors</span>
+<span class="sd">            - :obj:`~agent_inspect.models.tools.analysis_models.ErrorAnalysisResult.completed_subgoal_validations`: List of subgoal validations that were successfully completed without errors</span>
+<span class="sd">            </span>
+<span class="sd">        Example:</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; from agent_inspect.models.tools import ErrorAnalysisDataSample</span>
+<span class="sd">        &gt;&gt;&gt; from agent_inspect.tools import ErrorAnalysis </span>
+<span class="sd">        &gt;&gt;&gt; from agent_inspect.clients import AzureOpenAIClient</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # Prepare your error_analysis_data_samples: List[ErrorAnalysisDataSample] = [...]</span>
+<span class="sd">        &gt;&gt;&gt; error_analysis_data_samples: List[ErrorAnalysisDataSample] = [...] </span>
+<span class="sd">        &gt;&gt;&gt; llm_client = AzureOpenAIClient(</span>
+<span class="sd">        ...     model=&quot;gpt-4.1&quot;, </span>
+<span class="sd">        ...     max_tokens=4096</span>
+<span class="sd">        ...     )</span>
+<span class="sd">        &gt;&gt;&gt; error_analyzer = ErrorAnalysis(</span>
+<span class="sd">        ...     llm_client=llm_client, </span>
+<span class="sd">        ...     max_workers=10</span>
+<span class="sd">        ...     )</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; test_error_analysis_results = error_analyzer.analyze_batch(error_analysis_data_samples)</span>
+<span class="sd">        &gt;&gt;&gt; test_error_categories = list(test_error_analysis_results.analyzed_validations_clustered_by_errors.keys())</span>
+<span class="sd">        &gt;&gt;&gt; print(f&quot;Identified error categories: {test_error_categories}&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Process all data samples concurrently</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting error analysis for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data_samples</span><span class="p">)</span><span class="si">}</span><span class="s2"> data samples.&quot;</span><span class="p">)</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">runner</span><span class="p">():</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span>
+            <span class="n">loop</span><span class="o">.</span><span class="n">set_default_executor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executor</span><span class="p">)</span>
+            <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_analyze</span><span class="p">(</span><span class="n">data_sample</span><span class="p">)</span> <span class="k">for</span> <span class="n">data_sample</span> <span class="ow">in</span> <span class="n">data_samples</span><span class="p">]</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+
+        <span class="n">all_analyzed_subgoal_validations</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">runner</span><span class="p">())</span>
+        
+        <span class="c1"># TODO: revisit the clustering method (probably need to put it as a separate function)</span>
+        <span class="c1"># Seperate the results</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Separating analyzed subgoal validations from all data samples into completed and not completed.&quot;</span><span class="p">)</span>
+        <span class="n">complete_subgoal_analyzed_subgoal_validations</span><span class="p">,</span> <span class="n">incomplete_subgoal_analyzed_subgoal_validations</span> <span class="o">=</span>\
+            <span class="bp">self</span><span class="o">.</span><span class="n">_split_analysed_subgoal_validations_by_completeness</span><span class="p">(</span><span class="n">all_analyzed_subgoal_validations</span><span class="p">)</span>
+
+        <span class="c1"># Cluster the errors</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Clustering analyzed subgoal validations based on base errors.&quot;</span><span class="p">)</span>
+        <span class="n">llm_clusterings</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cluster_errors</span><span class="p">(</span><span class="n">incomplete_subgoal_analyzed_subgoal_validations</span><span class="p">))</span>
+        
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Building final clustered error analysis result.&quot;</span><span class="p">)</span>
+        <span class="n">analyzed_validations_clustered_by_errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_clustered_result</span><span class="p">(</span>
+            <span class="n">llm_clusterings</span><span class="p">,</span>
+            <span class="n">incomplete_subgoal_analyzed_subgoal_validations</span>
+        <span class="p">)</span>
+
+        <span class="n">final_result</span> <span class="o">=</span> <span class="n">ErrorAnalysisResult</span><span class="p">(</span>
+            <span class="n">analyzed_validations_clustered_by_errors</span><span class="o">=</span><span class="n">analyzed_validations_clustered_by_errors</span><span class="p">,</span>
+            <span class="n">completed_subgoal_validations</span><span class="o">=</span><span class="n">complete_subgoal_analyzed_subgoal_validations</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">final_result</span></div>
+
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_sample</span><span class="p">:</span> <span class="n">ErrorAnalysisDataSample</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">AnalyzedSubgoalValidation</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Analyze an error analysis data sample, obtaining a summarized BASE error for each subgoal validation.</span>
+<span class="sd">        Processes all subgoal validations within the sample concurrently.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Analyzing data sample with ID: </span><span class="si">{</span><span class="n">data_sample</span><span class="o">.</span><span class="n">data_sample_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_summarize_errors_into_base_error</span><span class="p">(</span><span class="n">subgoal_validation</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">subgoal_validation</span> <span class="ow">in</span> <span class="n">data_sample</span><span class="o">.</span><span class="n">subgoal_validations</span>
+        <span class="p">]</span>
+        <span class="n">base_errors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+        
+        <span class="n">analyzed_subgoal_validations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">AnalyzedSubgoalValidation</span><span class="p">(</span>
+                <span class="n">subgoal_validation</span><span class="o">=</span><span class="n">subgoal_validation</span><span class="p">,</span>
+                <span class="n">data_sample_id</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">data_sample_id</span><span class="p">,</span>
+                <span class="n">base_error</span><span class="o">=</span><span class="n">base_error</span><span class="p">,</span>
+                <span class="n">agent_run_id</span><span class="o">=</span><span class="n">data_sample</span><span class="o">.</span><span class="n">agent_run_id</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">subgoal_validation</span><span class="p">,</span> <span class="n">base_error</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data_sample</span><span class="o">.</span><span class="n">subgoal_validations</span><span class="p">,</span> <span class="n">base_errors</span><span class="p">)</span>
+        <span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">analyzed_subgoal_validations</span>
+    
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_summarize_errors_into_base_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subgoal_validation</span><span class="p">:</span> <span class="n">SubGoalValidationResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Analyze a single subgoal validation to summarize the issues raised by the judge trials.</span>
+
+<span class="sd">        If the subgoal validation shows the subgoal as completed, no error summarization is performed, and None is returned.</span>
+<span class="sd">        If all judge trials show incompletion, a single error summary is generated from the first judge trial explanation.</span>
+<span class="sd">        If there is a mix of completed and incompleted judge trials, error summaries are generated for each judge trial explanation,</span>
+<span class="sd">        and majority voting is performed to determine the most likely base error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">subgoal_validation</span><span class="o">.</span><span class="n">is_completed</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">judge_trial_explanations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_judge_trial_explanations_from_subgoal_validation</span><span class="p">(</span><span class="n">subgoal_validation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_failed_consistently</span><span class="p">(</span><span class="n">subgoal_validation</span><span class="p">):</span>
+            <span class="c1"># Take first judge trial explanation as representative</span>
+            <span class="n">base_error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_summarize_error</span><span class="p">(</span>
+                <span class="n">judge_trial_explanations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">subgoal_validation</span><span class="o">.</span><span class="n">sub_goal</span><span class="o">.</span><span class="n">details</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Get error for every judge trial explanation and do majority voting</span>
+            <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_summarize_error</span><span class="p">(</span><span class="n">judge_trial_explanation</span><span class="p">,</span> <span class="n">subgoal_validation</span><span class="o">.</span><span class="n">sub_goal</span><span class="o">.</span><span class="n">details</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">judge_trial_explanation</span> <span class="ow">in</span> <span class="n">judge_trial_explanations</span>
+            <span class="p">]</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+            <span class="n">base_error</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_majority_voting</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">base_error</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_judge_trial_explanations_from_subgoal_validation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subgoal_validation</span><span class="p">:</span> <span class="n">SubGoalValidationResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span> <span class="n">subgoal_validation</span><span class="o">.</span><span class="n">explanations</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid SubGoalValidationResult.explanation format.&quot;</span>
+                            <span class="s2">&quot;ErrorAnalysis expects SubGoalValidationResult.explanation to have an overall explanation in index 0,&quot;</span>
+                            <span class="s2">&quot;and judge trial explanations from index 1 onwards.&quot;</span><span class="p">)</span>
+        <span class="c1"># Strip out the overall explanation to get a list of judge trial explanations</span>
+        <span class="k">return</span> <span class="n">subgoal_validation</span><span class="o">.</span><span class="n">explanations</span><span class="p">[</span><span class="mi">1</span><span class="p">::]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_has_failed_consistently</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subgoal_validation</span><span class="p">:</span> <span class="n">SubGoalValidationResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if all judge trials for the subgoal validation have failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">judge_trials_explanations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_judge_trial_explanations_from_subgoal_validation</span><span class="p">(</span><span class="n">subgoal_validation</span><span class="p">)</span>
+        <span class="n">complete_cnt</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tally_votes</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">judge_trials_explanations</span><span class="p">)</span>
+        <span class="c1"># TODO: Add error handling for any instances of invalid_cnt &gt; 0</span>
+        <span class="k">return</span> <span class="n">complete_cnt</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_summarize_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">judge_trial_explanation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subgoal</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Summarize a single judge trial explanation into a concise error description using the LLM.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">LLMPayload</span><span class="p">(</span>
+            <span class="n">user_prompt</span><span class="o">=</span><span class="n">UNSUPERVISED_ERROR_SUMMARIZATION_PROMPT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">subgoals</span><span class="o">=</span><span class="n">subgoal</span><span class="p">,</span>
+                <span class="n">explanation</span><span class="o">=</span><span class="n">judge_trial_explanation</span>
+            <span class="p">),</span>
+            <span class="n">structured_output</span><span class="o">=</span><span class="n">ERROR_SUMMARIZATION_OUTPUT_SCHEMA</span>
+        <span class="p">)</span>
+        
+        <span class="n">response_dict</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry_if_json_decode_error</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;error_type&#39;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;error_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ToolError</span><span class="p">(</span><span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">UNSUCCESSFUL_LLM_SUMMARIZATION</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                            <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;LLM error summarization request failed as no error_type found in response: </span><span class="si">{</span><span class="n">response_dict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_perform_majority_voting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform majority voting on a list of error descriptions to determine the most common error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">LLMPayload</span><span class="p">(</span>
+            <span class="n">user_prompt</span><span class="o">=</span><span class="n">MAJORITY_VOTE_PROMPT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">error_type_list</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">structured_output</span><span class="o">=</span><span class="n">MAJORITY_VOTE_OUTPUT_SCHEMA</span>
+        <span class="p">)</span>
+        
+        <span class="n">response_dict</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry_if_json_decode_error</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;most_probable_error_type&#39;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;most_probable_error_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ToolError</span><span class="p">(</span><span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">UNSUCCESSFUL_MAJORITY_VOTING</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                            <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;LLM majority voting request failed as no most_probable_error_type found in response: </span><span class="si">{</span><span class="n">response_dict</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_split_analysed_subgoal_validations_by_completeness</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">analysed_subgoal_validation_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">AnalyzedSubgoalValidation</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">AnalyzedSubgoalValidation</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">AnalyzedSubgoalValidation</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Split a list of AnalyzedSubgoalValidation into completed and incompleted lists based on base errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">complete_subgoal_analysed_subgoal_validations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">incomplete_subgoal_analysed_subgoal_validations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">analysed_subgoal_validation_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">analysed_subgoal_validation</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">analysed_subgoal_validation</span><span class="o">.</span><span class="n">base_error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">complete_subgoal_analysed_subgoal_validations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">analysed_subgoal_validation</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">incomplete_subgoal_analysed_subgoal_validations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">analysed_subgoal_validation</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">complete_subgoal_analysed_subgoal_validations</span><span class="p">,</span> <span class="n">incomplete_subgoal_analysed_subgoal_validations</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_cluster_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analyzed_subgoal_validations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">AnalyzedSubgoalValidation</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cluster analyzed subgoal validations based on their base errors.</span>
+<span class="sd">        Returns a mapping from cluster labels to lists of analyzed subgoal validations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Build index -&gt; base_error mapping, and get all unique subgoals to prepare LLM prompt</span>
+        <span class="n">index_to_error_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span> <span class="n">analyzed_subgoal_validation</span><span class="o">.</span><span class="n">base_error</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">analyzed_subgoal_validation</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">analyzed_subgoal_validations</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">unique_subgoals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+            <span class="n">analysed_subgoal_validation</span><span class="o">.</span><span class="n">subgoal_validation</span><span class="o">.</span><span class="n">sub_goal</span><span class="o">.</span><span class="n">details</span> <span class="k">for</span> <span class="n">analysed_subgoal_validation</span> <span class="ow">in</span> <span class="n">analyzed_subgoal_validations</span>
+        <span class="p">))</span>
+        
+        <span class="c1"># Create LLM payload</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">LLMPayload</span><span class="p">(</span>
+            <span class="n">user_prompt</span><span class="o">=</span><span class="n">CLUSTERING_PROMPT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">error_types</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">index_to_error_mapping</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                <span class="n">subgoals</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">unique_subgoals</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">structured_output</span><span class="o">=</span><span class="n">CLUSTERING_OUTPUT_SCHEMA</span>
+        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry_if_json_decode_error</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_retry_if_json_decode_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="n">LLMPayload</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make an LLM request with retry logic for JSON decode errors.</span>
+<span class="sd">        Runs the LLM call in a thread pool to enable concurrent execution in async contexts.</span>
+<span class="sd">        </span>
+<span class="sd">        :param payload: The LLM payload containing the prompt and structured output schema</span>
+<span class="sd">        :return: Parsed JSON response as a dictionary</span>
+<span class="sd">        :raises ToolError: If the request fails or max retries are exceeded</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_retry_json_decode_error</span> <span class="o">=</span> <span class="n">MAX_RETRY_JSON_DECODE_ERROR</span>
+        <span class="n">attempt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retry_json_decode_error</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Run blocking LLM call in thread pool to enable concurrent execution</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+                    <span class="k">lambda</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_client</span><span class="o">.</span><span class="n">make_request_with_payload</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">STATUS_200</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ToolError</span><span class="p">(</span>
+                        <span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">CLIENT_REQUEST_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;LLM request failed with status </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> and error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">completion</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON decode error on attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_retry_json_decode_error</span><span class="si">}</span><span class="s2">: Empty completion received.&quot;</span><span class="p">)</span>
+                    <span class="n">attempt</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">completion</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON decode error on attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">max_retry_json_decode_error</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">attempt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">raise</span> <span class="n">ToolError</span><span class="p">(</span>
+            <span class="n">internal_code</span><span class="o">=</span><span class="n">ErrorCode</span><span class="o">.</span><span class="n">INVALID_JSON_DECODE_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Maximum retry attempts exceeded for JSON decode error.&quot;</span>
+        <span class="p">)</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_clustered_result</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">llm_clustering</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span>
+            <span class="n">analyzed_subgoal_validations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">AnalyzedSubgoalValidation</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">AnalyzedSubgoalValidation</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given the LLM clustering output and the list of analyzed subgoal validations, </span>
+<span class="sd">        maps cluster labels to list of analyzed subgoal validations using the index found in LLM clustering output.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">analyzed_validations_clustered_by_errors</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">llm_clustering</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">]:</span>
+            <span class="n">cluster_label</span> <span class="o">=</span> <span class="n">cluster</span><span class="p">[</span><span class="s1">&#39;cluster_label&#39;</span><span class="p">]</span>
+            <span class="n">error_ids</span> <span class="o">=</span> <span class="n">cluster</span><span class="p">[</span><span class="s1">&#39;error_ids&#39;</span><span class="p">]</span>
+            
+            <span class="n">analyzed_validations_clustered_by_errors</span><span class="p">[</span><span class="n">cluster_label</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">analyzed_subgoal_validations</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">error_id</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">error_id</span> <span class="ow">in</span> <span class="n">error_ids</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">error_id</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">analyzed_subgoal_validations</span><span class="p">)</span>
+            <span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">analyzed_validations_clustered_by_errors</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, &#34;&#34;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

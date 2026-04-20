@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agent_inspect.tools package &mdash; agent_inspect 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="agent_inspect.tools.error_analysis package" href="agent_inspect.tools.error_analysis.html" />
+    <link rel="prev" title="agent_inspect.models.user_proxy package" href="agent_inspect.models.user_proxy.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            agent_inspect
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">agent_inspect</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="agent_inspect.html">agent_inspect package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="agent_inspect.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.clients.html">agent_inspect.clients package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.exception.html">agent_inspect.exception package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.metrics.html">agent_inspect.metrics package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.models.html">agent_inspect.models package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">agent_inspect.tools package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.user_proxy.html">agent_inspect.user_proxy package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="agent_inspect.html#module-agent_inspect">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">agent_inspect</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">agent_inspect</a></li>
+          <li class="breadcrumb-item"><a href="agent_inspect.html">agent_inspect package</a></li>
+      <li class="breadcrumb-item active">agent_inspect.tools package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/agent_inspect.tools.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="agent-inspect-tools-package">
+<h1>agent_inspect.tools package<a class="headerlink" href="#agent-inspect-tools-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="agent_inspect.tools.error_analysis.html">agent_inspect.tools.error_analysis package</a></li>
+</ul>
+</div>
+</section>
+<section id="module-agent_inspect.tools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-agent_inspect.tools" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.tools.ErrorAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.tools.</span></span><span class="sig-name descname"><span class="pre">ErrorAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/tools/error_analysis/error_analysis.html#ErrorAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.tools.ErrorAnalysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Method to perform error analysis across multiple data samples using LLMs in order for developers to easily identify and understand common errors of agents. The method is based on subgoal validations and will execute a two-step unsupervised learning process: 1) low-level error identification, 2) semantic clustering of error types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>llm_client</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.clients.html#agent_inspect.clients.llm_client.LLMClient" title="agent_inspect.clients.llm_client.LLMClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLMClient</span></code></a></span>) – the client which allows connection to the LLM model for performing error analysis.</p></li>
+<li><p><strong>max_workers</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Maximum number of concurrent workers for processing data samples. Default to <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.tools.ErrorAnalysis.analyze_batch">
+<span class="sig-name descname"><span class="pre">analyze_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/tools/error_analysis/error_analysis.html#ErrorAnalysis.analyze_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.tools.ErrorAnalysis.analyze_batch" title="Link to this definition"></a></dt>
+<dd><p>Performs error analysis on a batch of data samples (usually across the entire dataset samples).
+Returns the <a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.ErrorAnalysisResult" title="agent_inspect.models.tools.analysis_models.ErrorAnalysisResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorAnalysisResult</span></code></a> containing the clustered error types with their associated subgoal validations and the rest of subgoal validations that don’t have errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_samples</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.ErrorAnalysisDataSample" title="agent_inspect.models.tools.analysis_models.ErrorAnalysisDataSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorAnalysisDataSample</span></code></a>]</span>) – List of data samples to perform error analysis on. Each data sample contains multiple subgoal validations.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.ErrorAnalysisResult" title="agent_inspect.models.tools.analysis_models.ErrorAnalysisResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorAnalysisResult</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>an <a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.ErrorAnalysisResult" title="agent_inspect.models.tools.analysis_models.ErrorAnalysisResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorAnalysisResult</span></code></a> containing the error analysis results:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.ErrorAnalysisResult.analyzed_validations_clustered_by_errors" title="agent_inspect.models.tools.analysis_models.ErrorAnalysisResult.analyzed_validations_clustered_by_errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">analyzed_validations_clustered_by_errors</span></code></a>: Dictionary mapping clustered error types to lists of incomplete subgoal validations exhibiting those errors</p></li>
+<li><p><a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.ErrorAnalysisResult.completed_subgoal_validations" title="agent_inspect.models.tools.analysis_models.ErrorAnalysisResult.completed_subgoal_validations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">completed_subgoal_validations</span></code></a>: List of subgoal validations that were successfully completed without errors</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorAnalysisDataSample</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorAnalysis</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.clients</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureOpenAIClient</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Prepare your error_analysis_data_samples: List[ErrorAnalysisDataSample] = [...]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">error_analysis_data_samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ErrorAnalysisDataSample</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">llm_client</span> <span class="o">=</span> <span class="n">AzureOpenAIClient</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4.1&quot;</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">4096</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">error_analyzer</span> <span class="o">=</span> <span class="n">ErrorAnalysis</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">llm_client</span><span class="o">=</span><span class="n">llm_client</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">max_workers</span><span class="o">=</span><span class="mi">10</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_error_analysis_results</span> <span class="o">=</span> <span class="n">error_analyzer</span><span class="o">.</span><span class="n">analyze_batch</span><span class="p">(</span><span class="n">error_analysis_data_samples</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_error_categories</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">test_error_analysis_results</span><span class="o">.</span><span class="n">analyzed_validations_clustered_by_errors</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Identified error categories: </span><span class="si">{</span><span class="n">test_error_categories</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.tools.StatisticAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.tools.</span></span><span class="sig-name descname"><span class="pre">StatisticAnalysis</span></span><a class="reference internal" href="_modules/agent_inspect/tools/error_analysis/statistic_analysis.html#StatisticAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.tools.StatisticAnalysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Method to compute expectation and variance of agent’s progress across multiple LLM-as-a-judge runs.</p>
+<p>For each subgoal <span class="math notranslate nohighlight">\(g_{i,j} \in G_i\)</span>, we define a binary random variable <span class="math notranslate nohighlight">\(Z_{i,j}\)</span>, where <span class="math notranslate nohighlight">\(Z_{i,j}=1\)</span> if the agent achieves the <span class="math notranslate nohighlight">\(j\)</span>-th subgoal (under the given trajectory), and <span class="math notranslate nohighlight">\(0\)</span> otherwise.</p>
+<p>Let the probability of achieving the subgoal <span class="math notranslate nohighlight">\(g_{i,j}\)</span> be <span class="math notranslate nohighlight">\(Pr(Z_{i,j}=1)=z_{i,j}\)</span>. Then, for a given sample with multiple subgoals <span class="math notranslate nohighlight">\((i, G_i)\)</span> and an agent trajectory <span class="math notranslate nohighlight">\(\tau_i\)</span>, we define the progress as the proportion of subgoals successfully achieved <span class="math notranslate nohighlight">\(progress(i, G_i, \tau_i) = \frac{\sum_j Z_{i,j}}{|G_i|}\)</span>.</p>
+<p>So the expectation and variance of agent’s progress are measured by:</p>
+<div class="math notranslate nohighlight">
+\[E[{progress}(i, G_i, \tau_i)] = \frac{\sum_j z_{i,j}}{|G_i|} \ ; \quad
+{Var}[{progress}(i, G_i, \tau_i)] = \frac{\sum_j z_{i,j} (1 - z_{i,j})}{|G_i|^2}\]</div>
+<p>where <span class="math notranslate nohighlight">\(z_{i,j}= \frac{1}{Q}\sum_{q=1}^Q z_{i,j}^{(q)}\)</span> is estimated by averaging over <span class="math notranslate nohighlight">\(Q\)</span> judge runs per subgoal, generalizing the single binary judge output to a probabilistic estimate.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.tools.StatisticAnalysis.compute_statistic_analysis_result">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_statistic_analysis_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_sample</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/tools/error_analysis/statistic_analysis.html#StatisticAnalysis.compute_statistic_analysis_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.tools.StatisticAnalysis.compute_statistic_analysis_result" title="Link to this definition"></a></dt>
+<dd><p>Returns the judge expectation and variance on a single data sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.ErrorAnalysisDataSample" title="agent_inspect.models.tools.analysis_models.ErrorAnalysisDataSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorAnalysisDataSample</span></code></a></span>) – The data sample containing subgoal validations.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.StatisticAnalysisResult" title="agent_inspect.models.tools.analysis_models.StatisticAnalysisResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatisticAnalysisResult</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>an <a class="reference internal" href="agent_inspect.models.tools.html#agent_inspect.models.tools.analysis_models.StatisticAnalysisResult" title="agent_inspect.models.tools.analysis_models.StatisticAnalysisResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StatisticAnalysisResult</span></code></a> containing judge expectation and variance.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorAnalysisDataSample</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubGoalValidationResult</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatisticAnalysis</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_sample</span> <span class="o">=</span> <span class="n">ErrorAnalysisDataSample</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">data_sample_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">agent_run_id</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">subgoal_validations</span><span class="o">=</span><span class="p">[</span>
+<span class="gp">... </span>        <span class="c1"># The first element is the summarized explanation, skipped in computation. The rest are truncated judge explanations for demo, which only contain &quot;Grade: I&quot; or &quot;Grade: C&quot;.</span>
+<span class="gp">... </span>        <span class="n">SubGoalValidationResult</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">explanations</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Check: {subgoal 1} has failed.&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: C&quot;</span><span class="p">]</span>
+<span class="gp">... </span>        <span class="p">),</span>
+<span class="gp">... </span>        <span class="n">SubGoalValidationResult</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">explanations</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Check: {subgoal 2} has failed.&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">,</span> <span class="s2">&quot;Grade: I&quot;</span><span class="p">]</span>
+<span class="gp">... </span>        <span class="p">)</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat_result</span> <span class="o">=</span> <span class="n">StatisticAnalysis</span><span class="o">.</span><span class="n">compute_statistic_analysis_result</span><span class="p">(</span><span class="n">data_sample</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat_result</span><span class="o">.</span><span class="n">judge_expectation</span>
+<span class="go">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stat_result</span><span class="o">.</span><span class="n">judge_std</span>
+<span class="go">0.2</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="agent_inspect.models.user_proxy.html" class="btn btn-neutral float-left" title="agent_inspect.models.user_proxy package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="agent_inspect.tools.error_analysis.html" class="btn btn-neutral float-right" title="agent_inspect.tools.error_analysis package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, &#34;&#34;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

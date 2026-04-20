@@ -1,0 +1,501 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agent_inspect.metrics.multi_samples package &mdash; agent_inspect 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="agent_inspect.metrics.observed package" href="agent_inspect.metrics.observed.html" />
+    <link rel="prev" title="agent_inspect.metrics.adapters package" href="agent_inspect.metrics.adapters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            agent_inspect
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">agent_inspect</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="agent_inspect.html">agent_inspect package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="agent_inspect.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.clients.html">agent_inspect.clients package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.exception.html">agent_inspect.exception package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="agent_inspect.metrics.html">agent_inspect.metrics package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.models.html">agent_inspect.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.tools.html">agent_inspect.tools package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="agent_inspect.user_proxy.html">agent_inspect.user_proxy package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="agent_inspect.html#module-agent_inspect">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">agent_inspect</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">agent_inspect</a></li>
+          <li class="breadcrumb-item"><a href="agent_inspect.html">agent_inspect package</a></li>
+          <li class="breadcrumb-item"><a href="agent_inspect.metrics.html">agent_inspect.metrics package</a></li>
+      <li class="breadcrumb-item active">agent_inspect.metrics.multi_samples package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/agent_inspect.metrics.multi_samples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="agent-inspect-metrics-multi-samples-package">
+<h1>agent_inspect.metrics.multi_samples package<a class="headerlink" href="#agent-inspect-metrics-multi-samples-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-agent_inspect.metrics.multi_samples.multi_sample_metric">
+<span id="agent-inspect-metrics-multi-samples-multi-sample-metric-module"></span><h2>agent_inspect.metrics.multi_samples.multi_sample_metric module<a class="headerlink" href="#module-agent_inspect.metrics.multi_samples.multi_sample_metric" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.metrics.multi_samples.multi_sample_metric.</span></span><span class="sig-name descname"><span class="pre">MultiSampleMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/multi_sample_metric.html#MultiSampleMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base abstract class for metrics that aggregate results across multiple samples
+or trials.</p>
+<p>Concrete subclasses should implement logic that combines multiple
+<code class="docutils literal notranslate"><span class="pre">NumericalScore</span></code> objects into a single aggregated score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional configuration dictionary for metric initialization.
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric.compute">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scorer_results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/multi_sample_metric.html#MultiSampleMetric.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric.compute" title="Link to this definition"></a></dt>
+<dd><p>Computes an aggregated metric score from multiple scorer results.</p>
+<p>This method is intended to be implemented by concrete subclasses that define
+how multiple trial-level or sample-level <code class="docutils literal notranslate"><span class="pre">NumericalScore</span></code> objects should be
+combined (for example, <a class="reference external" href="mailto:pass&#37;&#52;&#48;k-style">pass<span>&#64;</span>k-style</a> metrics).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scorer_results</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>]</span>) – A list of
+<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a> objects
+produced by scorer metrics, one per trial or sample.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A
+<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a> object
+containing the aggregated result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-agent_inspect.metrics.multi_samples.pass_at_k">
+<span id="agent-inspect-metrics-multi-samples-pass-at-k-module"></span><h2>agent_inspect.metrics.multi_samples.pass_at_k module<a class="headerlink" href="#module-agent_inspect.metrics.multi_samples.pass_at_k" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.pass_at_k.PassAtK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.metrics.multi_samples.pass_at_k.</span></span><span class="sig-name descname"><span class="pre">PassAtK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_at_k.html#PassAtK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.pass_at_k.PassAtK" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric" title="agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSampleMetric</span></code></a></p>
+<p>Metric to calculate pass&#64;k: the probability that at least one of k randomly sampled trials is successful.</p>
+<div class="math notranslate nohighlight">
+\[pass&#64;k = 1 - \frac{\binom{n-s}{k}}{\binom{n}{k}}\]</div>
+<dl class="simple">
+<dt>where:</dt><dd><ul class="simple">
+<li><p>n: total number of trials</p></li>
+<li><p>s: number of successful trials</p></li>
+<li><p>k: number of samples drawn</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> – Number of samples to draw (default: None, must be set before evaluation)</p></li>
+<li><p><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.pass_at_k.PassAtK.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success_scores</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_at_k.html#PassAtK.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.pass_at_k.PassAtK.compute" title="Link to this definition"></a></dt>
+<dd><p>Computes the pass&#64;k metric given a list of success scores from multiple trials.</p>
+<p>The pass&#64;k metric represents the probability that at least one of <cite>k</cite> randomly
+selected trials is successful, based on the total number of trials and the
+number of successful trials observed.</p>
+<p>Configuration values are retrieved from the metric config, falling back to
+defaults if not explicitly provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>success_scores</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>]</span>) – A list of <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+objects, one per trial, where each score indicates success (typically 0 or 1).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+object containing the computed pass&#64;k value.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="agent_inspect.exception.html#agent_inspect.exception.EvaluationError" title="agent_inspect.exception.EvaluationError"><strong>agent_inspect.exception.EvaluationError</strong></a> – <ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is less than or equal to 0</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">num_trials</span></code> is less than or equal to 0</p></li>
+<li><p>If the number of provided success scores does not match <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is greater than <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.multi_samples</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassAtK</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalScore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">K_VALUE</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">PassAtK</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="n">K_VALUE</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-agent_inspect.metrics.multi_samples.pass_hat_k">
+<span id="agent-inspect-metrics-multi-samples-pass-hat-k-module"></span><h2>agent_inspect.metrics.multi_samples.pass_hat_k module<a class="headerlink" href="#module-agent_inspect.metrics.multi_samples.pass_hat_k" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.pass_hat_k.PassHatK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.metrics.multi_samples.pass_hat_k.</span></span><span class="sig-name descname"><span class="pre">PassHatK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_hat_k.html#PassHatK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.pass_hat_k.PassHatK" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric" title="agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSampleMetric</span></code></a></p>
+<p>Metric to calculate pass^k: the probability that exactly k randomly sampled trials are successful.</p>
+<div class="math notranslate nohighlight">
+\[pass^k = \frac{\binom{s}{k}}{\binom{n}{k}}\]</div>
+<dl class="simple">
+<dt>where:</dt><dd><ul class="simple">
+<li><p>n: total number of trials</p></li>
+<li><p>s: number of successful trials</p></li>
+<li><p>k: number of samples drawn</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> – Number of samples to draw (default: None, must be set before evaluation)</p></li>
+<li><p><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.pass_hat_k.PassHatK.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success_scores</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_hat_k.html#PassHatK.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.pass_hat_k.PassHatK.compute" title="Link to this definition"></a></dt>
+<dd><p>Computes the pass^k metric given a list of success scores from multiple trials.</p>
+<p>The pass^k metric represents the probability that <strong>exactly</strong> <cite>k</cite> randomly
+selected trials are successful, based on the total number of trials and the
+number of successful trials observed.</p>
+<p>Configuration values are retrieved from the metric config, falling back to
+defaults if not explicitly provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>success_scores</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>]</span>) – A list of <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+objects, one per trial, where each score indicates success (typically 0 or 1).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+object containing the computed pass^k value.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="agent_inspect.exception.html#agent_inspect.exception.EvaluationError" title="agent_inspect.exception.EvaluationError"><strong>agent_inspect.exception.EvaluationError</strong></a> – <ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is less than or equal to 0</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">num_trials</span></code> is less than or equal to 0</p></li>
+<li><p>If the number of provided success scores does not match <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is greater than <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.multi_samples</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassHatK</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalScore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">K_VALUE</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">PassHatK</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="n">K_VALUE</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-agent_inspect.metrics.multi_samples">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-agent_inspect.metrics.multi_samples" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.MultiSampleMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.metrics.multi_samples.</span></span><span class="sig-name descname"><span class="pre">MultiSampleMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/multi_sample_metric.html#MultiSampleMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.MultiSampleMetric" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base abstract class for metrics that aggregate results across multiple samples
+or trials.</p>
+<p>Concrete subclasses should implement logic that combines multiple
+<code class="docutils literal notranslate"><span class="pre">NumericalScore</span></code> objects into a single aggregated score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional configuration dictionary for metric initialization.
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.MultiSampleMetric.compute">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scorer_results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/multi_sample_metric.html#MultiSampleMetric.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.MultiSampleMetric.compute" title="Link to this definition"></a></dt>
+<dd><p>Computes an aggregated metric score from multiple scorer results.</p>
+<p>This method is intended to be implemented by concrete subclasses that define
+how multiple trial-level or sample-level <code class="docutils literal notranslate"><span class="pre">NumericalScore</span></code> objects should be
+combined (for example, <a class="reference external" href="mailto:pass&#37;&#52;&#48;k-style">pass<span>&#64;</span>k-style</a> metrics).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scorer_results</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>]</span>) – A list of
+<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a> objects
+produced by scorer metrics, one per trial or sample.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A
+<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a> object
+containing the aggregated result.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.PassAtK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.metrics.multi_samples.</span></span><span class="sig-name descname"><span class="pre">PassAtK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_at_k.html#PassAtK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.PassAtK" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric" title="agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSampleMetric</span></code></a></p>
+<p>Metric to calculate pass&#64;k: the probability that at least one of k randomly sampled trials is successful.</p>
+<div class="math notranslate nohighlight">
+\[pass&#64;k = 1 - \frac{\binom{n-s}{k}}{\binom{n}{k}}\]</div>
+<dl class="simple">
+<dt>where:</dt><dd><ul class="simple">
+<li><p>n: total number of trials</p></li>
+<li><p>s: number of successful trials</p></li>
+<li><p>k: number of samples drawn</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> – Number of samples to draw (default: None, must be set before evaluation)</p></li>
+<li><p><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.PassAtK.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success_scores</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_at_k.html#PassAtK.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.PassAtK.compute" title="Link to this definition"></a></dt>
+<dd><p>Computes the pass&#64;k metric given a list of success scores from multiple trials.</p>
+<p>The pass&#64;k metric represents the probability that at least one of <cite>k</cite> randomly
+selected trials is successful, based on the total number of trials and the
+number of successful trials observed.</p>
+<p>Configuration values are retrieved from the metric config, falling back to
+defaults if not explicitly provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>success_scores</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>]</span>) – A list of <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+objects, one per trial, where each score indicates success (typically 0 or 1).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+object containing the computed pass&#64;k value.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="agent_inspect.exception.html#agent_inspect.exception.EvaluationError" title="agent_inspect.exception.EvaluationError"><strong>agent_inspect.exception.EvaluationError</strong></a> – <ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is less than or equal to 0</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">num_trials</span></code> is less than or equal to 0</p></li>
+<li><p>If the number of provided success scores does not match <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is greater than <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.multi_samples</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassAtK</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalScore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">K_VALUE</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">PassAtK</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="n">K_VALUE</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.PassHatK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agent_inspect.metrics.multi_samples.</span></span><span class="sig-name descname"><span class="pre">PassHatK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_hat_k.html#PassHatK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.PassHatK" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric" title="agent_inspect.metrics.multi_samples.multi_sample_metric.MultiSampleMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSampleMetric</span></code></a></p>
+<p>Metric to calculate pass^k: the probability that exactly k randomly sampled trials are successful.</p>
+<div class="math notranslate nohighlight">
+\[pass^k = \frac{\binom{s}{k}}{\binom{n}{k}}\]</div>
+<dl class="simple">
+<dt>where:</dt><dd><ul class="simple">
+<li><p>n: total number of trials</p></li>
+<li><p>s: number of successful trials</p></li>
+<li><p>k: number of samples drawn</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> – Number of samples to draw (default: None, must be set before evaluation)</p></li>
+<li><p><strong>config</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="agent_inspect.metrics.multi_samples.PassHatK.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">success_scores</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agent_inspect/metrics/multi_samples/pass_hat_k.html#PassHatK.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agent_inspect.metrics.multi_samples.PassHatK.compute" title="Link to this definition"></a></dt>
+<dd><p>Computes the pass^k metric given a list of success scores from multiple trials.</p>
+<p>The pass^k metric represents the probability that <strong>exactly</strong> <cite>k</cite> randomly
+selected trials are successful, based on the total number of trials and the
+number of successful trials observed.</p>
+<p>Configuration values are retrieved from the metric config, falling back to
+defaults if not explicitly provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>success_scores</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>]</span>) – A list of <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+objects, one per trial, where each score indicates success (typically 0 or 1).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericalScore</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="agent_inspect.models.metrics.html#agent_inspect.models.metrics.metric_score.NumericalScore" title="agent_inspect.models.metrics.metric_score.NumericalScore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NumericalScore</span></code></a>
+object containing the computed pass^k value.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="agent_inspect.exception.html#agent_inspect.exception.EvaluationError" title="agent_inspect.exception.EvaluationError"><strong>agent_inspect.exception.EvaluationError</strong></a> – <ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is less than or equal to 0</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">num_trials</span></code> is less than or equal to 0</p></li>
+<li><p>If the number of provided success scores does not match <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">k_value</span></code> is greater than <code class="docutils literal notranslate"><span class="pre">num_trials</span></code></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.multi_samples</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassHatK</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalScore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">K_VALUE</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metric</span> <span class="o">=</span> <span class="n">PassHatK</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="n">K_VALUE</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="n">NO_OF_TRIALS</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>          <span class="n">NumericalScore</span><span class="p">(</span><span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="agent_inspect.metrics.adapters.html" class="btn btn-neutral float-left" title="agent_inspect.metrics.adapters package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="agent_inspect.metrics.observed.html" class="btn btn-neutral float-right" title="agent_inspect.metrics.observed package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, &#34;&#34;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

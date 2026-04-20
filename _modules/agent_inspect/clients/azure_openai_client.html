@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agent_inspect.clients.azure_openai_client &mdash; agent_inspect 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            agent_inspect
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">agent_inspect</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">agent_inspect</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">agent_inspect.clients.azure_openai_client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for agent_inspect.clients.azure_openai_client</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">backoff</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureOpenAI</span><span class="p">,</span> <span class="n">APIStatusError</span><span class="p">,</span> <span class="n">RateLimitError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.clients.llm_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.llm_payload</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMPayload</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.models.llm_response</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMResponse</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">agent_inspect.metrics.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">STATUS_200</span><span class="p">,</span> <span class="n">STATUS_500</span><span class="p">,</span> <span class="n">STATUS_429</span><span class="p">,</span> <span class="n">MAX_RETRY_ATTEMPTS_EXCEEDED</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="backoff_handler">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.backoff_handler">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">backoff_handler</span><span class="p">(</span><span class="n">details</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom handler for backoff events to log messages with extra attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Backing off </span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(args=</span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, kwargs=</span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;kwargs&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">) &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;for </span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;wait&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(tries=</span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;tries&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, elapsed=</span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;elapsed&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s, &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;exception: </span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;exception&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="give_up_handler">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.give_up_handler">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">give_up_handler</span><span class="p">(</span><span class="n">details</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Custom handler for when max retries are reached.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Max retries reached for </span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(args=</span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, kwargs=</span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;kwargs&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;elapsed=</span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;elapsed&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s, exception: </span><span class="si">{</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;exception&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="AzureOpenAIClient">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.AzureOpenAIClient">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AzureOpenAIClient</span><span class="p">(</span><span class="n">LLMClient</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Client class providing connection to the Azure OpenAI Service. Need to set the following environment variables: ``AZURE_API_VERSION``, ``AZURE_API_BASE``, ``AZURE_API_KEY``.</span>
+
+<span class="sd">    :param model: the selected Azure OpenAI model which will receive the prompt. This is the deployment name in Azure.</span>
+<span class="sd">    :param max_tokens: the maximum number of tokens allowed for the LLM to generate.</span>
+<span class="sd">    :param temperature: the temperature setting for LLM model. Default to ``0``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_tokens</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_tokens</span> <span class="o">=</span> <span class="n">max_tokens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chat_client</span> <span class="o">=</span> <span class="n">AzureOpenAI</span><span class="p">(</span>
+            <span class="n">api_version</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;AZURE_API_VERSION&#39;</span><span class="p">],</span>
+            <span class="n">azure_endpoint</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;AZURE_API_BASE&#39;</span><span class="p">],</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;AZURE_API_KEY&#39;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
+
+<div class="viewcode-block" id="AzureOpenAIClient.make_llm_request_with_retry">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.AzureOpenAIClient.make_llm_request_with_retry">[docs]</a>
+    <span class="nd">@backoff</span><span class="o">.</span><span class="n">on_exception</span><span class="p">(</span>
+        <span class="n">backoff</span><span class="o">.</span><span class="n">expo</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">APIStatusError</span><span class="p">,</span> <span class="n">RateLimitError</span><span class="p">,</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">Timeout</span><span class="p">,</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectionError</span><span class="p">,</span>
+         <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span><span class="p">),</span>
+        <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">jitter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_backoff</span><span class="o">=</span><span class="n">backoff_handler</span><span class="p">,</span>
+        <span class="n">on_giveup</span><span class="o">=</span><span class="n">give_up_handler</span><span class="p">,</span>
+        <span class="n">giveup</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">APIStatusError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">status_code</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">401</span><span class="p">,</span> <span class="mi">403</span><span class="p">,</span> <span class="mi">404</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">make_llm_request_with_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">prompt</span><span class="p">}]</span>
+        <span class="n">azure_openai_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+            <span class="n">max_tokens</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_tokens</span><span class="p">,</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">azure_openai_response</span></div>
+
+
+
+<div class="viewcode-block" id="AzureOpenAIClient.make_llm_request">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.AzureOpenAIClient.make_llm_request">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">make_llm_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLMResponse</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns LLM completion after sending a prompt to the selected the model.</span>
+<span class="sd">        Uses an exponential backoff retry mechanism for transient failures.</span>
+
+<span class="sd">        :param prompt: the provided prompt to send to the model.</span>
+<span class="sd">        :return: :obj:`~agent_inspect.models.llm_response.LLMResponse` object containing status code, completion and error message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Backoff decorator handles retries; this try-catch handles final failures</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">azure_openai_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_llm_request_with_retry</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">STATUS_200</span><span class="p">,</span> <span class="n">completion</span><span class="o">=</span><span class="n">azure_openai_response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">RateLimitError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">STATUS_429</span><span class="p">,</span> <span class="n">completion</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">error_message</span><span class="o">=</span><span class="n">MAX_RETRY_ATTEMPTS_EXCEEDED</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">APIStatusError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Non-retryable errors (4xx) or final failure after all retries</span>
+            <span class="k">return</span> <span class="n">LLMResponse</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">completion</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Azure OpenAI API Error: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Catch any other unexpected errors</span>
+            <span class="k">return</span> <span class="n">LLMResponse</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">STATUS_500</span><span class="p">,</span>
+                <span class="n">completion</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">error_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Unexpected error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AzureOpenAIClient.make_llm_requests">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.AzureOpenAIClient.make_llm_requests">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">make_llm_requests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LLMResponse</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns LLM completion after sending a prompt to the selected the model.</span>
+
+<span class="sd">        :param prompts: a list of provided prompts to send to the model.</span>
+<span class="sd">        :return: a :obj:`~typing.List` [:obj:`~agent_inspect.models.llm_response.LLMResponse`] object containing status codes, completions and error messages.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">responses</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">make_llm_request</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span> <span class="k">for</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="n">prompts</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="AzureOpenAIClient.convert_payload_to_raw_request">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.AzureOpenAIClient.convert_payload_to_raw_request">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">convert_payload_to_raw_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="n">LLMPayload</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">raw_request</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">:</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">payload</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">})</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">payload</span><span class="o">.</span><span class="n">user_prompt</span><span class="p">})</span>
+        <span class="n">raw_request</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">model</span> <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">model</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="n">raw_request</span><span class="p">[</span><span class="s2">&quot;messages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">messages</span>
+        <span class="n">raw_request</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">temperature</span> <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">temperature</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
+        <span class="n">raw_request</span><span class="p">[</span><span class="s2">&quot;max_tokens&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">max_tokens</span> <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">max_tokens</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_tokens</span>
+        <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">structured_output</span><span class="p">:</span>
+            <span class="n">raw_request</span><span class="p">[</span><span class="s2">&quot;response_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">structured_output</span>
+        <span class="k">return</span> <span class="n">raw_request</span></div>
+
+
+<div class="viewcode-block" id="AzureOpenAIClient.make_request_with_payload_using_retry">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.AzureOpenAIClient.make_request_with_payload_using_retry">[docs]</a>
+    <span class="nd">@backoff</span><span class="o">.</span><span class="n">on_exception</span><span class="p">(</span>
+        <span class="n">backoff</span><span class="o">.</span><span class="n">expo</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">APIStatusError</span><span class="p">,</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">Timeout</span><span class="p">,</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectionError</span><span class="p">,</span>
+         <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span><span class="p">),</span>
+        <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+        <span class="n">jitter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_backoff</span><span class="o">=</span><span class="n">backoff_handler</span><span class="p">,</span>
+        <span class="n">on_giveup</span><span class="o">=</span><span class="n">give_up_handler</span><span class="p">,</span>
+        <span class="n">giveup</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">APIStatusError</span><span class="p">)</span> <span class="ow">and</span> <span class="n">e</span><span class="o">.</span><span class="n">status_code</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">401</span><span class="p">,</span> <span class="mi">403</span><span class="p">,</span> <span class="mi">404</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">make_request_with_payload_using_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="n">LLMPayload</span><span class="p">):</span>
+        <span class="n">raw_request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_payload_to_raw_request</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="n">azure_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chat_client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">raw_request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">azure_response</span></div>
+
+    
+<div class="viewcode-block" id="AzureOpenAIClient.make_request_with_payload">
+<a class="viewcode-back" href="../../../agent_inspect.clients.html#agent_inspect.clients.azure_openai_client.AzureOpenAIClient.make_request_with_payload">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">make_request_with_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="n">LLMPayload</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLMResponse</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns LLM completion after sending a payload to the selected the model.</span>
+
+<span class="sd">        :param payload: the provided payload to send to the model.</span>
+<span class="sd">        :return: :obj:`~agent_inspect.models.llm_response.LLMResponse` object containing status code, completion and error message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">azure_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_request_with_payload_using_retry</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">STATUS_200</span><span class="p">,</span> <span class="n">completion</span><span class="o">=</span><span class="n">azure_response</span><span class="o">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">RateLimitError</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">STATUS_429</span><span class="p">,</span> <span class="n">completion</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">error_message</span><span class="o">=</span><span class="n">MAX_RETRY_ATTEMPTS_EXCEEDED</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">APIStatusError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">completion</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">error_message</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">STATUS_500</span><span class="p">,</span> <span class="n">completion</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">error_message</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">response</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, &#34;&#34;.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
